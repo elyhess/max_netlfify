@@ -6,5 +6,5 @@
 [[plugins]]
   package = "netlify-plugin-ttl-cache"
 [plugins.inputs]  
-  path = "build"
+  path = "public"
   ttl = 90
