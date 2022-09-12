@@ -2,3 +2,9 @@
   publish = "build"
   functions = "functions"
   command = "npm run build"
+
+[[plugins]]
+  package = "netlify-plugin-ttl-cache"
+[plugins.inputs]  
+  path = "build"
+  ttl = 90
