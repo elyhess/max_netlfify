@@ -1,8 +1,7 @@
 import React, {useState} from "react";
-import logo from "../img/logo3.png";
+import logo from "../img/logo3.webp";
 import { useMediaQuery } from 'react-responsive'
 import SendEmail from '../services/EmailService'
-import ConfettiButton from "./confettiButton";
 
 export default function Contact() {
   const isPortrait = useMediaQuery({ query: '(max-width: 750px)' })
@@ -160,14 +159,14 @@ export default function Contact() {
                         </div>
                         <div className="col-md-12 mb-3">
                           <div className="form-group">
-                            <input hidden id='fileUpload' type='file' multiple
+                            <input role="button" hidden id='fileUpload' type='file' multiple
                                     accept='application/pdf, image/png'
                                               onChange={handleFileEvent}
                                               disabled={fileLimit}
                                 />
 
                             <label htmlFor='fileUpload'>
-                              <a  className={`btn btn-primary ${!fileLimit ? '' : 'disabled' } `}>Upload Files</a>
+                              <div className={`btn btn-primary ${!fileLimit ? '' : 'disabled' } `}>Upload Files</div>
                             </label>
                             <div className="uploaded-files-list text-black-50">
                               {uploadedFiles.map(file => (
@@ -232,7 +231,7 @@ export default function Contact() {
 
                       </div>
                       <div className="socials">
-                        <ul>
+                        {/* <ul>
               
                           <li>
                             <a
@@ -245,7 +244,7 @@ export default function Contact() {
                               </span>
                             </a>
                           </li>
-                        </ul>
+                        </ul> */}
                       </div>
                       <div className="text-center">
                           <img

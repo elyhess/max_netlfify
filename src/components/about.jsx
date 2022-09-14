@@ -1,5 +1,5 @@
 import React from "react";
-import logo2 from "../img/logo2.png";
+import logo2 from "../img/logo2.webp";
 import { useMediaQuery } from 'react-responsive'
 
 
@@ -62,18 +62,15 @@ export default function About() {
                     <div className="title-box-2">
                       <h5 className="title-left">FAQ</h5>
                     </div>
-                    {data.about_me.map(content => {
-                      return (
-                        <p className="lead" key={content.id}>
-                          <div className="faq-q">Q: {content.q}</div>
+                    {data.about_me.map(content => (
+                        <div className="lead" key={content.id}>
+                          <div className="faq-q" key={content.id}>Q: {content.q}</div>
                           <br></br>
                           <span className="faq-q">A:</span> {content.a}
                           <br></br>
                           <br></br>
-
-                        </p>
-                      );
-                    })}
+                        </div>
+                    ))}
                   </div>
                 </div>
               </div>
