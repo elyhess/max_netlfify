@@ -1,7 +1,8 @@
 import React, {useState} from "react";
 import logo from "../img/logo3.png";
 import { useMediaQuery } from 'react-responsive'
-
+import SendEmail from '../services/EmailService'
+import ConfettiButton from "./confettiButton";
 
 export default function Contact() {
   const isPortrait = useMediaQuery({ query: '(max-width: 750px)' })
@@ -53,10 +54,10 @@ export default function Contact() {
         location: data.get('location'),
         attachments: uploadedFiles
     }
-    console.log(templateParams)
     setSubmitted(true)
+    SendEmail(templateParams)
 }
-console.log(isPortrait)
+
   return (
     <div id="home" className="intro route bg-image background">
     <div id="stars" />
@@ -74,136 +75,144 @@ console.log(isPortrait)
                       <h5 className="title-left">Send A Message</h5>
                     </div>
                     <div>
-                      <form onSubmit={handleSubmit} className="contactForm">
+                      {
+                        submitted ? 
+                        (<div>you did it </div>) 
+                        : 
+                        (  <div >
+                          <form onSubmit={handleSubmit} className="contactForm">  
                         <div id="sendmessage">
-                          Your message has been sent. Thank you!
+                        Your message has been sent. Thank you!
+                      </div>
+                      <div id="errormessage"></div>
+                      <div className="row">
+                        <div className="col-md-12 mb-3">
+                          <div className="form-group">
+                            <input
+                              type="text"
+                              name="firstName"
+                              onChange={(e) => setName(e.target.value)}
+                              className="form-control"
+                              id="name"
+                              placeholder="Your Name"
+                              data-rule="minlen:4"
+                              data-msg="Please enter at least 4 chars"
+                            />
+                            <div className="validation"></div>
+                          </div>
                         </div>
-                        <div id="errormessage"></div>
-                        <div className="row">
-                          <div className="col-md-12 mb-3">
-                            <div className="form-group">
-                              <input
-                                type="text"
-                                name="firstName"
-                                onChange={(e) => setName(e.target.value)}
-                                className="form-control"
-                                id="name"
-                                placeholder="Your Name"
-                                data-rule="minlen:4"
-                                data-msg="Please enter at least 4 chars"
-                              />
-                              <div className="validation"></div>
-                            </div>
+                        <div className="col-md-12 mb-3">
+                          <div className="form-group">
+                            <input
+                              type="email"
+                              onChange={(e) => setEmail(e.target.value)}
+                              className="form-control"
+                              name="email"
+                              id="email"
+                              placeholder="Your Email"
+                              data-rule="email"
+                              data-msg="Please enter a valid email"
+                            />
+                            <div className="validation"></div>
                           </div>
-                          <div className="col-md-12 mb-3">
-                            <div className="form-group">
-                              <input
-                                type="email"
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="form-control"
-                                name="email"
-                                id="email"
-                                placeholder="Your Email"
-                                data-rule="email"
-                                data-msg="Please enter a valid email"
-                              />
-                              <div className="validation"></div>
-                            </div>
+                        </div>
+                        <div className="col-md-12 mb-3">
+                          <div className="form-group">
+                            <input
+                              type="text"
+                              onChange={(e) => setPhone(e.target.value)}
+                              className="form-control"
+                              name="phone"
+                              id="phone"
+                              data-rule="required"
+                              placeholder="Phone Number"
+                            />
+                            <div className="validation"></div>
                           </div>
-                          <div className="col-md-12 mb-3">
-                            <div className="form-group">
-                              <input
-                                type="text"
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="form-control"
-                                name="phone"
-                                id="phone"
-                                data-rule="required"
-                                placeholder="Phone Number"
-                              />
-                              <div className="validation"></div>
-                            </div>
+                        </div>
+                        <div className="col-md-12 mb-3">
+                          <div className="form-group">
+                            <textarea
+                              className="form-control"
+                              onChange={(e) => setDescription(e.target.value)}
+                              name="description"
+                              rows="5"
+                              id="description"
+                              data-rule="required"
+                              placeholder="Description - Please be as detailed as possible."
+                            ></textarea>
+                            <div className="validation"></div>
                           </div>
-                          <div className="col-md-12 mb-3">
-                            <div className="form-group">
-                              <textarea
-                                className="form-control"
-                                onChange={(e) => setDescription(e.target.value)}
-                                name="description"
-                                rows="5"
-                                id="description"
-                                data-rule="required"
-                                placeholder="Description - Please be as detailed as possible."
-                              ></textarea>
-                              <div className="validation"></div>
-                            </div>
+                        </div>
+                        <div className="col-md-12 mb-3">
+                          <div className="form-group">
+                            <textarea
+                              className="form-control"
+                              name="location"
+                              onChange={(e) => setLocation(e.target.value)}
+                              rows="2"
+                              id="location"
+                              data-rule="required"
+                              placeholder="Location & size"
+                            ></textarea>
+                            <div className="validation"></div>
                           </div>
-                          <div className="col-md-12 mb-3">
-                            <div className="form-group">
-                              <textarea
-                                className="form-control"
-                                name="location"
-                                onChange={(e) => setLocation(e.target.value)}
-                                rows="2"
-                                id="location"
-                                data-rule="required"
-                                placeholder="Location & size"
-                              ></textarea>
-                              <div className="validation"></div>
-                            </div>
-                          </div>
-                          <div className="col-md-12 mb-3">
-                            <div className="form-group">
-                              <input hidden id='fileUpload' type='file' multiple
-                                      accept='application/pdf, image/png'
-                                                onChange={handleFileEvent}
-                                                disabled={fileLimit}
-                                  />
+                        </div>
+                        <div className="col-md-12 mb-3">
+                          <div className="form-group">
+                            <input hidden id='fileUpload' type='file' multiple
+                                    accept='application/pdf, image/png'
+                                              onChange={handleFileEvent}
+                                              disabled={fileLimit}
+                                />
 
-                              <label htmlFor='fileUpload'>
-                                <a  className={`btn btn-success ${!fileLimit ? '' : 'disabled' } `}>Upload Files</a>
-                              </label>
-                              <div className="uploaded-files-list text-black-50">
-                                {uploadedFiles.map(file => (
-                                            <div >
-                                                {file.name}
-                                            </div>
-                                        ))}
-                              </div>
-
-                              <div className="validation"></div>
+                            <label htmlFor='fileUpload'>
+                              <a  className={`btn btn-primary ${!fileLimit ? '' : 'disabled' } `}>Upload Files</a>
+                            </label>
+                            <div className="uploaded-files-list text-black-50">
+                              {uploadedFiles.map(file => (
+                                          <div key={file.name}>
+                                              {file.name}
+                                          </div>
+                                      ))}
                             </div>
-                          </div>
 
-                          <div className="col-md-12 mb-3">
-                            <div className="form-group">
-                          {formFilled ?
-                            (
-                              <button
-                              type="submit"
-                              className="button-big btn-primary btn rainbow-button btn"
-                              >
-                              Send Message
-                            </button>
-                            ) : (
-                              <button
-                              className="button button-big disable-button"
+                            <div className="validation"></div>
+                          </div>
+                        </div>
+
+                        <div className="col-md-12 mb-3">
+                          <div className="form-group">
+                        {formFilled ?
+                          (
+                            <button
+                            type="submit"
+                            className="button-big btn-primary btn rainbow-button btn"
                             >
-                              Send Message
-                            </button>
-                            )
-                          }
-                          <div className="validation"></div>
-                            </div>
+                            Send Message
+                          </button>
+                          ) : (
+                            <button
+                            className="button button-big disable-button"
+                          >
+                            Send Message
+                          </button>
+                          )
+                        }
+                        <div className="validation"></div>
                           </div>
-
                         </div>
+                          </div>
                       </form>
+                      </div>)
+                      }
                     </div>
                   </div>
                   {
-                    isPortrait ? (
-                    <div></div>
+                    isPortrait || submitted ? (
+                    <div>
+
+                    </div>
                     ) : (
                     <div className="col-md-6">
                       <div className="title-box-2 pt-4 pt-md-0">

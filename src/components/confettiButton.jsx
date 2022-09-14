@@ -6,7 +6,7 @@ export default function ConfettiButton(props){
 
   return (
     <div class="confetti-button">
-      <Confetti active={props.data} />
+      <Confetti active={props.active} />
     </div>
   );
 }
