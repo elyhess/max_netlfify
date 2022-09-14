@@ -1,5 +1,6 @@
 import React from "react";
 import logo2 from "../img/logo2.webp";
+
 import { useMediaQuery } from 'react-responsive'
 
 
