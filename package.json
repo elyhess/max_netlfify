@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@sendgrid/mail": "^7.7.0",
+    "axios": "^0.27.2",
     "bootstrap": "^4.3.1",
     "dotenv": "^16.0.2",
     "emailjs": "^3.8.1",
@@ -27,6 +28,7 @@
     "react-scripts": "^3.3.0",
     "react-typed": "^1.1.2",
     "scraper-instagram": "^1.0.17",
+    "send-mail": "file:./functions/sendmail/sendmail",
     "typed.js": "^2.0.10"
   },
   "engines": {

@@ -1,7 +1,8 @@
 import React, {useState} from "react";
+import axios from 'axios';
 import logo from "../img/logo3.webp";
 import { useMediaQuery } from 'react-responsive'
-import SendEmail from '../services/EmailService'
+
 
 export default function Contact() {
   const isPortrait = useMediaQuery({ query: '(max-width: 750px)' })
@@ -42,7 +43,7 @@ export default function Contact() {
       handleUploadFiles(chosenFiles);
   }
 
-  const handleSubmit = (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const templateParams = {
@@ -54,7 +55,6 @@ export default function Contact() {
         attachments: uploadedFiles
     }
     setSubmitted(true)
-    SendEmail(templateParams)
 }
 
   return (
@@ -76,13 +76,15 @@ export default function Contact() {
                     <div>
                       {
                         submitted ? 
-                        (<div>you did it </div>) 
+                        (
+                        <div id="sendmessage show" className="text-black-50">
+                        Your message has been sent. Thank you!
+                        </div>
+                        ) 
                         : 
                         (  <div >
-                          <form onSubmit={handleSubmit} className="contactForm">  
-                        <div id="sendmessage">
-                        Your message has been sent. Thank you!
-                      </div>
+                          <form onSubmit={handleSubmit} className="contactForm" data-netlify="true">  
+            
                       <div id="errormessage"></div>
                       <div className="row">
                         <div className="col-md-12 mb-3">
