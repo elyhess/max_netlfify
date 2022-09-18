@@ -28,7 +28,6 @@
     "react-scripts": "^3.3.0",
     "react-typed": "^1.1.2",
     "scraper-instagram": "^1.0.17",
-    "send-mail": "file:./functions/sendmail/sendmail",
     "typed.js": "^2.0.10"
   },
   "engines": {
