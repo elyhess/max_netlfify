@@ -8,7 +8,7 @@ export default function About() {
   const isPortrait = useMediaQuery({ query: '(max-width: 750px)' })
   const imgWidth = isPortrait ? "50%" : "100%"
   const data = {
-    logo: logo2, 
+    logo: logo2,
     about_me: [
       {
         id: "1",
@@ -49,28 +49,29 @@ export default function About() {
           <div className="col-sm-12">
             <div className="box-shadow-full">
               <div className="row">
-                  <div className="col-md-6">
-                    <div className="row">
-                          <img
-                            src={data.logo}
-                            alt="logo"
-                            style={{ width: imgWidth, margin: "0 auto", textAlign: "center"}}
-                          /> 
-                  </div>
+                <div className="col-md-6">
+                  {isPortrait ? (<div></div>) : (
+                    <div className="row mt-5">
+                      <img
+                        src={data.logo}
+                        alt="logo"
+                        style={{ width: imgWidth, margin: "0 auto", textAlign: "center" }} />
+                    </div>
+                  )}
                 </div>
                 <div className="col-md-6">
-                  <div className="about-me pt-4 pt-md-0">
+                  <div className="about-me">
                     <div className="title-box-2">
                       <h5 className="title-left">FAQ</h5>
                     </div>
                     {data.about_me.map(content => (
-                        <div className="lead" key={content.id}>
-                          <div className="faq-q" key={content.id}>Q: {content.q}</div>
-                          <br></br>
-                          <span className="faq-q">A:</span> {content.a}
-                          <br></br>
-                          <br></br>
-                        </div>
+                      <div className="lead" key={content.id}>
+                        <div className="faq-q" key={content.id}>Q: {content.q}</div>
+                        <br></br>
+                        <span className="faq-q">A:</span> {content.a}
+                        <br></br>
+                        <br></br>
+                      </div>
                     ))}
                   </div>
                 </div>

@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import axios from 'axios';
 import logo from "../img/logo3.webp";
 import { useMediaQuery } from 'react-responsive'
-
+import Compressor from "compressorjs";
+import sendEmail from "../services/EmailService";
 
 export default function Contact() {
   const isPortrait = useMediaQuery({ query: '(max-width: 750px)' })
@@ -14,49 +15,106 @@ export default function Contact() {
   const [description, setDescription] = useState()
   const [submitted, setSubmitted] = useState(false)
   const [location, setLocation] = useState()
-  const formFilled = name && email && phone && description && location
+  // const formFilled = name && email && phone && description && location
+  const formFilled = true
+  const form = useRef()
 
   const [uploadedFiles, setUploadedFiles] = useState([])
-  const [fileLimit, setFileLimit] = useState(false);
+  const [formattedFiles, setFormattedFiles] = useState([])
+  const [fileLimit, setFileLimit] = useState(false)
+  const [totalSize, setTotalSize] = useState(0)
 
-  const handleUploadFiles = files => {
+  async function handleUploadFiles(files) {
     const uploaded = [...uploadedFiles];
     let limitExceeded = false;
-    files.some((file) => {
+    let newSize = totalSize;
+
+    const options = {
+      quality: 0.2,
+      maxWidth: 600
+    };
+
+    const formattedFiles = await Promise.all(
+      files.map(async (file) => {
+        try {
+          const compressedFile = await new Promise((resolve) => {
+            new Compressor(file, {
+              ...options,
+              success: (result) => {
+                resolve(result);
+              },
+              error: (err) => {
+                console.error(err);
+                resolve(null);
+              },
+            });
+          });
+
+          if (!compressedFile) {
+            return null;
+          }
+
+          console.log("compressed file", compressedFile);
+          // resolve(`data:${file.type};base64,${base64String}`);
+          const arrayBuffer = await compressedFile.arrayBuffer();
+          const base64Data = Buffer.from(arrayBuffer).toString("base64");
+
+          const attachment = {
+            name: compressedFile.name,
+            data: base64Data,
+            type: compressedFile.type,
+            size: base64Data.length * 0.75,
+          };
+
+          return attachment;
+        } catch (err) {
+          console.error(err);
+          return null;
+        }
+      })
+    );
+
+    console.log("formattedFiles", formattedFiles);
+    const filteredFormattedFiles = formattedFiles.filter(
+      (attachment) => attachment !== null
+    );
+
+    setFormattedFiles(filteredFormattedFiles);
+    console.log("ff", filteredFormattedFiles)
+
+    formattedFiles.forEach((file) => {
+      console.log(file)
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
-        uploaded.push(file);
+        newSize += file.size;
+        if (newSize < 500000) {
+          console.log(file.data)
+          uploaded.push(file);
+        } else {
+          alert('The total size of your attachments exceeds 500kb.');
+        }
         if (uploaded.length === MAX_COUNT) setFileLimit(true);
         if (uploaded.length > MAX_COUNT) {
           alert(`You can only add a maximum of ${MAX_COUNT} files`);
           setFileLimit(false);
           limitExceeded = true;
-          return true;
         }
       }
-    })
-    if (!limitExceeded) setUploadedFiles(uploaded)
+    });
 
+    if (!limitExceeded) setUploadedFiles(uploaded);
   }
 
   const handleFileEvent = (e) => {
+    console.log("uploaded files", uploadedFiles)
     const chosenFiles = Array.prototype.slice.call(e.target.files)
     handleUploadFiles(chosenFiles);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const data = new FormData(e.currentTarget);
-    const templateParams = {
-      firstName: data.get('firstName'),
-      email: data.get('email'),
-      phone: data.get('phone'),
-      description: data.get('description'),
-      location: data.get('location'),
-      attachments: uploadedFiles
-    }
     setSubmitted(true)
     try {
-      await axios.post('/.netlify/functions/submission-created', templateParams)
+      sendEmail(form)
     } catch (e) {
       console.error(e)
       alert('Your message could not be sent. Sorry about that.')
@@ -72,7 +130,7 @@ export default function Contact() {
       <div className="container">
         <div className="row">
           <div className="col-sm-12 sect-pt12">
-            <div className="contact-mf">
+            <div className="">
               <div id="contact" className="box-shadow-full pb-3">
                 <div className="row">
                   <div className={`wrapper searchDiv ${isPortrait ? "col-md-12" : "col-md-6"}`}>
@@ -83,13 +141,13 @@ export default function Contact() {
                       {
                         submitted ?
                           (
-                            <div id="sendmessage show" className="text-black-50">
+                            <div id="sendmessage show" className="text-black-50 pb-5">
                               Your message has been sent. Thank you!
                             </div>
                           )
                           :
                           (<div >
-                            <form onSubmit={handleSubmit} className="contactForm" data-netlify="true">
+                            <form onSubmit={handleSubmit} ref={form} id="contactForm" className="contactForm">
 
                               <div id="errormessage"></div>
                               <div className="row">
@@ -167,13 +225,13 @@ export default function Contact() {
                                 </div>
                                 <div className="col-md-12 mb-3">
                                   <div className="form-group">
-                                    <input role="button" hidden id='fileUpload' type='file' multiple
-                                      accept='application/pdf, image/png'
+                                    <input role="button" hidden id='attachments' type='file' multiple
+                                      name="attachments"
                                       onChange={handleFileEvent}
                                       disabled={fileLimit}
                                     />
 
-                                    <label htmlFor='fileUpload'>
+                                    <label htmlFor='attachments'>
                                       <div className={`btn btn-primary ${!fileLimit ? '' : 'disabled'} `}>Upload Files</div>
                                     </label>
                                     <div className="uploaded-files-list text-black-50">
@@ -226,17 +284,13 @@ export default function Contact() {
                           <h5 className="title-left">MAX VK TATTOOS</h5>
                         </div>
                         <div className="more-info">
-                          <p className="lead text-black-50">
-                            Please read the FAQ section before submitting an email
-                            {/* <br /> */}
-                            {/* Simply fill the from and send me an email. */}
-                          </p>
-                          {/* <!-- <ul class="list-ico">
-                                <li><span class="ion-ios-location"></span> 329 WASHINGTON ST BOSTON, MA 02108</li>
-                                <li><span class="ion-ios-telephone"></span> (617) 557-0089</li>
-                                <li><span class="ion-email"></span> contact@example.com</li>
-                                </ul> --> */}
-
+                          <li className="lead text-black-50">File upload size must not exceed 500mb</li>
+                        </div>
+                        <div className="more-info">
+                          <li className="lead text-black-50">Accepted Formats: jpeg, webp</li>
+                        </div>
+                        <div className="more-info">
+                          <li className="lead text-black-50">Please read the FAQ before reaching out</li>
                         </div>
                         <div className="socials">
                           {/* <ul>
