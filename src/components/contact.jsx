@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import axios from 'axios';
 import logo from "../img/logo3.webp";
 import { useMediaQuery } from 'react-responsive'
@@ -21,6 +21,11 @@ export default function Contact() {
 
   const [uploadedFiles, setUploadedFiles] = useState([])
   const [formattedFiles, setFormattedFiles] = useState([])
+
+  useEffect(() => {
+    console.log('formattedFiles updated:', uploadedFiles);
+  }, [uploadedFiles]);
+
   const [fileLimit, setFileLimit] = useState(false)
   const [totalSize, setTotalSize] = useState(0)
 
@@ -66,7 +71,8 @@ export default function Contact() {
             size: base64Data.length * 0.75,
           };
 
-          return attachment;
+          // return attachment;
+          return compressedFile;
         } catch (err) {
           console.error(err);
           return null;
@@ -80,14 +86,12 @@ export default function Contact() {
     );
 
     setFormattedFiles(filteredFormattedFiles);
-    // console.log("ff", filteredFormattedFiles)
 
     formattedFiles.forEach((file) => {
-      console.log(file)
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
         newSize += file.size;
         if (newSize < 500000) {
-          console.log("ff", file)
+          // console.log("ff", file)
           uploaded.push(file);
         } else {
           alert('The total size of your attachments exceeds 500kb.');
@@ -101,13 +105,31 @@ export default function Contact() {
       }
     });
 
-    if (!limitExceeded) setUploadedFiles(uploaded);
+    // if (!limitExceeded) setUploadedFiles(uploaded);
+    return new Promise((resolve) => {
+      setUploadedFiles((prevState) => {
+        console.log("uploaded formatted", uploaded);
+        resolve(uploaded);
+        return uploaded;
+      });
+    });
   }
 
-  const handleFileEvent = (e) => {
-    console.log("uploaded files", uploadedFiles)
+  const handleFileEvent = async (e) => {
+    e.persist()
+    console.log("original files", e.target.files)
     const chosenFiles = Array.prototype.slice.call(e.target.files)
-    handleUploadFiles(chosenFiles);
+    const updatedFiles = await handleUploadFiles(chosenFiles);
+
+    console.log("hs-ff", updatedFiles)
+
+    const dataTransfer = new DataTransfer();
+    updatedFiles.forEach((blob) => {
+      const file = new File([blob], blob.name, { type: blob.type });
+      dataTransfer.items.add(file);
+    });
+    e.target.files = dataTransfer.files
+    console.log("compressed files", e.target.files);
   }
 
   async function handleSubmit(e) {
@@ -147,7 +169,7 @@ export default function Contact() {
                           )
                           :
                           (<div >
-                            <form onSubmit={handleSubmit} ref={form} id="contactForm" className="contactForm">
+                            <form onSubmit={(e) => handleSubmit(e)} ref={form} id="contactForm" className="contactForm">
 
                               <div id="errormessage"></div>
                               <div className="row">
