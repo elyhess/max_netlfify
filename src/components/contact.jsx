@@ -80,14 +80,14 @@ export default function Contact() {
     );
 
     setFormattedFiles(filteredFormattedFiles);
-    console.log("ff", filteredFormattedFiles)
+    // console.log("ff", filteredFormattedFiles)
 
     formattedFiles.forEach((file) => {
       console.log(file)
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
         newSize += file.size;
         if (newSize < 500000) {
-          console.log(file.data)
+          console.log("ff", file)
           uploaded.push(file);
         } else {
           alert('The total size of your attachments exceeds 500kb.');
