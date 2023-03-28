@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import axios from 'axios';
 import logo from "../img/logo3.webp";
 import { useMediaQuery } from 'react-responsive'
-
+import Compressor from "compressorjs";
+import sendEmail from "../services/EmailService";
 
 export default function Contact() {
   const isPortrait = useMediaQuery({ query: '(max-width: 750px)' })
@@ -14,54 +15,125 @@ export default function Contact() {
   const [description, setDescription] = useState()
   const [submitted, setSubmitted] = useState(false)
   const [location, setLocation] = useState()
-  const formFilled = name && email && phone && description && location
+  // const formFilled = name && email && phone && description && location
+  const formFilled = true
+  const form = useRef()
+  const inputElement = useRef(null)
 
   const [uploadedFiles, setUploadedFiles] = useState([])
-  const [fileLimit, setFileLimit] = useState(false);
+  const [formattedFiles, setFormattedFiles] = useState([])
 
-  const handleUploadFiles = files => {
+  useEffect(() => {
+    console.log('formattedFiles updated:', uploadedFiles);
+  }, [uploadedFiles]);
+
+  async function handleUploadFiles(files) {
     const uploaded = [...uploadedFiles];
-    let limitExceeded = false;
-    files.some((file) => {
+    let newSize = uploaded.reduce((acc, file) => acc + file.size, 0);
+
+    const options = {
+      quality: 0.2,
+      maxWidth: 600
+    };
+
+    const formattedFiles = await Promise.all(
+      files.map(async (file) => {
+        try {
+          const compressedFile = await new Promise((resolve) => {
+            new Compressor(file, {
+              ...options,
+              success: (result) => {
+                resolve(result);
+              },
+              error: (err) => {
+                console.error(err);
+                resolve(null);
+              },
+            });
+          });
+          return compressedFile;
+        } catch (err) {
+          console.error(err);
+          return null;
+        }
+      })
+    );
+
+    console.log("formattedFiles", formattedFiles);
+    const filteredFormattedFiles = formattedFiles.filter(
+      (attachment) => attachment !== null
+    );
+
+    setFormattedFiles(filteredFormattedFiles);
+
+    formattedFiles.forEach((file) => {
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
-        uploaded.push(file);
-        if (uploaded.length === MAX_COUNT) setFileLimit(true);
-        if (uploaded.length > MAX_COUNT) {
-          alert(`You can only add a maximum of ${MAX_COUNT} files`);
-          setFileLimit(false);
-          limitExceeded = true;
-          return true;
+        const updatedSize = newSize + file.size;
+        console.log("update size", updatedSize)
+        if (updatedSize <= 500000) {
+          newSize = updatedSize;
+          uploaded.push(file);
+        } else {
+          alert("The total size of your attachments exceeds 500kb. Some files were not added.");
         }
       }
-    })
-    if (!limitExceeded) setUploadedFiles(uploaded)
+    });
 
+    return new Promise((resolve) => {
+      setUploadedFiles((prevState) => {
+        console.log("uploaded formatted", uploaded);
+        resolve(uploaded);
+        return uploaded;
+      });
+    });
   }
 
-  const handleFileEvent = (e) => {
+  const handleFileEvent = async (e) => {
+    e.persist()
+    console.log("original files", e.target.files)
     const chosenFiles = Array.prototype.slice.call(e.target.files)
-    handleUploadFiles(chosenFiles);
+    const updatedFiles = await handleUploadFiles(chosenFiles);
+
+    console.log("hs-ff", updatedFiles)
+
+    const dataTransfer = new DataTransfer();
+    updatedFiles.forEach((blob) => {
+      const file = new File([blob], blob.name, { type: blob.type });
+      dataTransfer.items.add(file);
+    });
+    e.target.files = dataTransfer.files
+    console.log("compressed files", e.target.files);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const data = new FormData(e.currentTarget);
-    const templateParams = {
-      firstName: data.get('firstName'),
-      email: data.get('email'),
-      phone: data.get('phone'),
-      description: data.get('description'),
-      location: data.get('location'),
-      attachments: uploadedFiles
-    }
     setSubmitted(true)
     try {
-      await axios.post('/.netlify/functions/submission-created', templateParams)
+      sendEmail(form)
     } catch (e) {
       console.error(e)
       alert('Your message could not be sent. Sorry about that.')
     }
   }
+
+  function getFileName(str) {
+    if (str.length > 12) { return str.substr(0, 6) + '...' + str.substr(-6) }
+    return str
+  }
+
+  const deleteFile = (fileName) => {
+    const updatedUploadedFiles = uploadedFiles.filter((file) => file.name !== fileName);
+    setUploadedFiles(updatedUploadedFiles);
+
+    if (inputElement.current) {
+      const dataTransfer = new DataTransfer();
+      updatedUploadedFiles.forEach((blob) => {
+        const file = new File([blob], blob.name, { type: blob.type });
+        dataTransfer.items.add(file);
+      });
+      inputElement.current.files = dataTransfer.files;
+    }
+  };
 
   return (
     <div id="home" className="intro route bg-image background">
@@ -72,7 +144,7 @@ export default function Contact() {
       <div className="container">
         <div className="row">
           <div className="col-sm-12 sect-pt12">
-            <div className="contact-mf">
+            <div className="">
               <div id="contact" className="box-shadow-full pb-3">
                 <div className="row">
                   <div className={`wrapper searchDiv ${isPortrait ? "col-md-12" : "col-md-6"}`}>
@@ -83,13 +155,13 @@ export default function Contact() {
                       {
                         submitted ?
                           (
-                            <div id="sendmessage show" className="text-black-50">
+                            <div id="sendmessage show" className="text-black-50 pb-5">
                               Your message has been sent. Thank you!
                             </div>
                           )
                           :
                           (<div >
-                            <form onSubmit={handleSubmit} className="contactForm" data-netlify="true">
+                            <form onSubmit={(e) => handleSubmit(e)} ref={form} id="contactForm" className="contactForm">
 
                               <div id="errormessage"></div>
                               <div className="row">
@@ -167,24 +239,41 @@ export default function Contact() {
                                 </div>
                                 <div className="col-md-12 mb-3">
                                   <div className="form-group">
-                                    <input role="button" hidden id='fileUpload' type='file' multiple
-                                      accept='application/pdf, image/png'
+                                    <input
+                                      role="button"
+                                      hidden
+                                      id="attachments"
+                                      type="file"
+                                      multiple
+                                      name="attachments"
+                                      accept=".heic, .jpeg, .jpg, .png, .webp"
                                       onChange={handleFileEvent}
-                                      disabled={fileLimit}
+                                      ref={inputElement}
                                     />
 
-                                    <label htmlFor='fileUpload'>
-                                      <div className={`btn btn-primary ${!fileLimit ? '' : 'disabled'} `}>Upload Files</div>
+                                    <label htmlFor='attachments'>
+                                      <div className="btn btn-primary">Upload Images</div>
                                     </label>
                                     <div className="uploaded-files-list text-black-50">
                                       {uploadedFiles.map(file => (
-                                        <div key={file.name}>
-                                          {file.name}
+                                        <div className="row" key={file.name}>
+                                          <div className="col-8" key={file.name}>
+                                            {getFileName(file.name)} - {file.size.toLocaleString("en-US")} kb
+                                          </div>
+                                          <div className="col-4">
+                                            <button type="button"
+                                              className="close"
+                                              style={{ color: "red" }}
+                                              aria-label="Close"
+                                              onClick={(e) => deleteFile(file.name)}
+                                            >
+                                              <span aria-hidden="true" key={file.name}>&times;</span>
+                                            </button>
+                                          </div>
                                         </div>
                                       ))}
                                     </div>
-
-                                    <div className="validation"></div>
+                                    {/* <div className="validation"></div> */}
                                   </div>
                                 </div>
 
@@ -226,33 +315,9 @@ export default function Contact() {
                           <h5 className="title-left">MAX VK TATTOOS</h5>
                         </div>
                         <div className="more-info">
-                          <p className="lead text-black-50">
-                            Please read the FAQ section before submitting an email
-                            {/* <br /> */}
-                            {/* Simply fill the from and send me an email. */}
-                          </p>
-                          {/* <!-- <ul class="list-ico">
-                                <li><span class="ion-ios-location"></span> 329 WASHINGTON ST BOSTON, MA 02108</li>
-                                <li><span class="ion-ios-telephone"></span> (617) 557-0089</li>
-                                <li><span class="ion-email"></span> contact@example.com</li>
-                                </ul> --> */}
-
+                          <li className="lead text-black-50">Please read the FAQ before reaching out</li>
                         </div>
                         <div className="socials">
-                          {/* <ul>
-              
-                          <li>
-                            <a
-                              href=""
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <span className="ico-circle">
-                                <i className="ion-social-instagram"></i>
-                              </span>
-                            </a>
-                          </li>
-                        </ul> */}
                         </div>
                         <div className="text-center">
                           <img

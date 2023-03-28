@@ -35,10 +35,10 @@ ReactDOM.render(
         <Navbar />
         <Intro />
         <About />
-        <Portfolio />
+        {/* <Portfolio /> */}
         <Contact />
         <BackToTop />
-        <Preloader />
+        {/* <Preloader /> */}
     </React.Fragment>,
     document.getElementById('root'));
 
