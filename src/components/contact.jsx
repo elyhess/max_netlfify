@@ -26,13 +26,9 @@ export default function Contact() {
     console.log('formattedFiles updated:', uploadedFiles);
   }, [uploadedFiles]);
 
-  const [fileLimit, setFileLimit] = useState(false)
-  const [totalSize, setTotalSize] = useState(0)
-
   async function handleUploadFiles(files) {
     const uploaded = [...uploadedFiles];
-    let limitExceeded = false;
-    let newSize = totalSize;
+    let newSize = uploaded.reduce((acc, file) => acc + file.size, 0);
 
     const options = {
       quality: 0.2,
@@ -54,24 +50,6 @@ export default function Contact() {
               },
             });
           });
-
-          if (!compressedFile) {
-            return null;
-          }
-
-          console.log("compressed file", compressedFile);
-          // resolve(`data:${file.type};base64,${base64String}`);
-          const arrayBuffer = await compressedFile.arrayBuffer();
-          const base64Data = Buffer.from(arrayBuffer).toString("base64");
-
-          const attachment = {
-            name: compressedFile.name,
-            data: base64Data,
-            type: compressedFile.type,
-            size: base64Data.length * 0.75,
-          };
-
-          // return attachment;
           return compressedFile;
         } catch (err) {
           console.error(err);
@@ -89,23 +67,17 @@ export default function Contact() {
 
     formattedFiles.forEach((file) => {
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
-        newSize += file.size;
-        if (newSize < 500000) {
-          // console.log("ff", file)
+        const updatedSize = newSize + file.size;
+        console.log("update size", updatedSize)
+        if (updatedSize <= 500000) {
+          newSize = updatedSize;
           uploaded.push(file);
         } else {
-          alert('The total size of your attachments exceeds 500kb.');
-        }
-        if (uploaded.length === MAX_COUNT) setFileLimit(true);
-        if (uploaded.length > MAX_COUNT) {
-          alert(`You can only add a maximum of ${MAX_COUNT} files`);
-          setFileLimit(false);
-          limitExceeded = true;
+          alert("The total size of your attachments exceeds 500kb. Some files were not added.");
         }
       }
     });
 
-    // if (!limitExceeded) setUploadedFiles(uploaded);
     return new Promise((resolve) => {
       setUploadedFiles((prevState) => {
         console.log("uploaded formatted", uploaded);
@@ -142,6 +114,20 @@ export default function Contact() {
       alert('Your message could not be sent. Sorry about that.')
     }
   }
+
+  function getFileName(str) {
+    if (str.length > 12) { return str.substr(0, 6) + '...' + str.substr(-6) }
+    return str
+  }
+
+  const deleteFile = (fileName) => {
+    console.log(e)
+    const updatedFormattedFiles = formattedFiles.filter((file) => file.name !== fileName);
+    setFormattedFiles(updatedFormattedFiles);
+
+    const updatedUploadedFiles = uploadedFiles.filter((file) => file.name !== fileName);
+    setUploadedFiles(updatedUploadedFiles);
+  };
 
   return (
     <div id="home" className="intro route bg-image background">
@@ -249,22 +235,33 @@ export default function Contact() {
                                   <div className="form-group">
                                     <input role="button" hidden id='attachments' type='file' multiple
                                       name="attachments"
+                                      accept=".heic, .jpeg, .jpg, .png, .webp"
                                       onChange={handleFileEvent}
-                                      disabled={fileLimit}
                                     />
 
                                     <label htmlFor='attachments'>
-                                      <div className={`btn btn-primary ${!fileLimit ? '' : 'disabled'} `}>Upload Files</div>
+                                      <div className="btn btn-primary">Upload Images</div>
                                     </label>
                                     <div className="uploaded-files-list text-black-50">
                                       {uploadedFiles.map(file => (
-                                        <div key={file.name}>
-                                          {file.name}
+                                        <div className="row" key={file.name}>
+                                          <div className="col-8" key={file.name}>
+                                            {getFileName(file.name)} - {file.size.toLocaleString("en-US")} kb
+                                          </div>
+                                          <div className="col-4">
+                                            <button type="button"
+                                              className="close"
+                                              style={{ color: "red" }}
+                                              aria-label="Close"
+                                              onClick={(e) => deleteFile(e, file.name)}
+                                            >
+                                              <span aria-hidden="true" key={file.name}>&times;</span>
+                                            </button>
+                                          </div>
                                         </div>
                                       ))}
                                     </div>
-
-                                    <div className="validation"></div>
+                                    {/* <div className="validation"></div> */}
                                   </div>
                                 </div>
 
@@ -306,29 +303,9 @@ export default function Contact() {
                           <h5 className="title-left">MAX VK TATTOOS</h5>
                         </div>
                         <div className="more-info">
-                          <li className="lead text-black-50">File upload size must not exceed 500mb</li>
-                        </div>
-                        <div className="more-info">
-                          <li className="lead text-black-50">Accepted Formats: jpeg, webp</li>
-                        </div>
-                        <div className="more-info">
                           <li className="lead text-black-50">Please read the FAQ before reaching out</li>
                         </div>
                         <div className="socials">
-                          {/* <ul>
-              
-                          <li>
-                            <a
-                              href=""
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <span className="ico-circle">
-                                <i className="ion-social-instagram"></i>
-                              </span>
-                            </a>
-                          </li>
-                        </ul> */}
                         </div>
                         <div className="text-center">
                           <img
