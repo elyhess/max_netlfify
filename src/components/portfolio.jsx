@@ -9,7 +9,7 @@ export default function Portfolio() {
     return images;
   }
 
-  const allImages = importAll(require.context('../maxvktattoos', false, /\.(webp)$/));
+  // const allImages = importAll(require.context('../maxvktattoos', false, /\.(webp)$/));
   const [next, setNext] = useState(imagePerRow);
   const handleMoreImage = () => {
     setNext(next + imagePerRow);
