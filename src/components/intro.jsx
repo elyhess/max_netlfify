@@ -1,7 +1,6 @@
 import React from "react";
 import "./stars.scss";
 import Typed from "react-typed";
-import InstagramIcon from '@mui/icons-material/Instagram';
 import logo from "../img/logo5.png";
 import $ from "jquery";
 import { useMediaQuery } from 'react-responsive'
