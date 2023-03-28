@@ -23,14 +23,25 @@ export default function Intro() {
                 <img
                   src={logo}
                   alt="logo"
-                  style={{ width: imgWidth, margin: "0 auto", textAlign: "center" }} />
+                  style={{
+                    width: imgWidth,
+                    margin: "0 auto",
+                    textAlign: "center",
+                    transform: "rotate(05deg)", // Add rotation here
+                  }} />
               </div>
             ) : (
               <div className="row pb-4 mb-18">
                 <img
                   src={logo}
                   alt="logo"
-                  style={{ width: imgWidth, margin: "0 auto", textAlign: "center" }} />
+                  style={{
+                    width: imgWidth,
+                    margin: "0 auto",
+                    textAlign: "center",
+                    transform: "rotate(05deg)", // Add rotation here
+                  }}
+                />
               </div>
             )}
             <h1 className="intro-title">MAX VK TATTOOS</h1>
