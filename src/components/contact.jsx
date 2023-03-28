@@ -18,6 +18,7 @@ export default function Contact() {
   // const formFilled = name && email && phone && description && location
   const formFilled = true
   const form = useRef()
+  const inputElement = useRef(null)
 
   const [uploadedFiles, setUploadedFiles] = useState([])
   const [formattedFiles, setFormattedFiles] = useState([])
@@ -121,12 +122,17 @@ export default function Contact() {
   }
 
   const deleteFile = (fileName) => {
-    console.log(e)
-    const updatedFormattedFiles = formattedFiles.filter((file) => file.name !== fileName);
-    setFormattedFiles(updatedFormattedFiles);
-
     const updatedUploadedFiles = uploadedFiles.filter((file) => file.name !== fileName);
     setUploadedFiles(updatedUploadedFiles);
+
+    if (inputElement.current) {
+      const dataTransfer = new DataTransfer();
+      updatedUploadedFiles.forEach((blob) => {
+        const file = new File([blob], blob.name, { type: blob.type });
+        dataTransfer.items.add(file);
+      });
+      inputElement.current.files = dataTransfer.files;
+    }
   };
 
   return (
@@ -233,10 +239,16 @@ export default function Contact() {
                                 </div>
                                 <div className="col-md-12 mb-3">
                                   <div className="form-group">
-                                    <input role="button" hidden id='attachments' type='file' multiple
+                                    <input
+                                      role="button"
+                                      hidden
+                                      id="attachments"
+                                      type="file"
+                                      multiple
                                       name="attachments"
                                       accept=".heic, .jpeg, .jpg, .png, .webp"
                                       onChange={handleFileEvent}
+                                      ref={inputElement}
                                     />
 
                                     <label htmlFor='attachments'>
@@ -253,7 +265,7 @@ export default function Contact() {
                                               className="close"
                                               style={{ color: "red" }}
                                               aria-label="Close"
-                                              onClick={(e) => deleteFile(e, file.name)}
+                                              onClick={(e) => deleteFile(file.name)}
                                             >
                                               <span aria-hidden="true" key={file.name}>&times;</span>
                                             </button>
