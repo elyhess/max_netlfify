@@ -1,23 +1,13 @@
 import React from "react";
 import "./stars.scss";
-import Typed from "react-typed";
 import logo from "../img/logo5.png";
-import $ from "jquery";
 import { useMediaQuery } from 'react-responsive'
 
 export default function Intro() {
   const isPortrait = useMediaQuery({ query: '(max-width: 750px)' })
   const imgWidth = isPortrait ? "50%" : "20%"
-  // const [clicked, setClicked] = useState(false)
-  // const changeState = () => {  
-  //   setClicked(true)
-  //   setTimeout(function(){
-  //     setClicked(false)
-  // }, 2000);
-  //  }; 
 
   return (
-    // <div id="home" className="intro route bg-image " style={{backgroundImage: "url("+bigImage+")"}}>
     <div id="home" className="intro route bg-image background">
       <div id="stars" />
       <div id="stars2" />

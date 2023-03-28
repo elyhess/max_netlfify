@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from "react";
-import axios from 'axios';
 import logo from "../img/logo3.webp";
 import { useMediaQuery } from 'react-responsive'
 import Compressor from "compressorjs";
