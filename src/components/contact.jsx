@@ -272,6 +272,7 @@ export default function Contact() {
                                       <div className="row" key={file.name}>
                                         <div className="col-8" key={file.name}>
                                           {getFileName(file.name)} - {file.size.toLocaleString("en-US")} kb
+                                          {/* {getFileName(file.name)} */}
                                         </div>
                                         <div className="col-4">
                                           <button type="button"
@@ -348,16 +349,6 @@ export default function Contact() {
           </div>
         </div>
       </div >
-      <footer>
-        <div className="container">
-          <div className="row">
-            <div className="col-sm-12">
-              <div className="copyright-box">
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
     </section >
   );
 }
