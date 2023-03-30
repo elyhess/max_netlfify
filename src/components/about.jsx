@@ -5,7 +5,7 @@ import { useMediaQuery } from 'react-responsive'
 
 
 export default function About() {
-  const isPortrait = useMediaQuery({ query: '(max-width: 750px)' })
+  const isPortrait = useMediaQuery({ query: '(max-width: 768px)' })
   const imgWidth = isPortrait ? "50%" : "100%"
   const data = {
     logo: logo2,

@@ -5,7 +5,7 @@ import Compressor from "compressorjs";
 import sendEmail from "../services/EmailService";
 
 export default function Contact() {
-  const isPortrait = useMediaQuery({ query: '(max-width: 750px)' })
+  const isPortrait = useMediaQuery({ query: '(max-width: 768px)' })
   const MAX_COUNT = 5;
 
   const [name, setName] = useState()
@@ -14,8 +14,7 @@ export default function Contact() {
   const [description, setDescription] = useState()
   const [submitted, setSubmitted] = useState(false)
   const [location, setLocation] = useState()
-  // const formFilled = name && email && phone && description && location
-  const formFilled = true
+  const formFilled = name && email && phone && description && location
   const form = useRef()
   const inputElement = useRef(null)
 
@@ -135,7 +134,7 @@ export default function Contact() {
   };
 
   return (
-    <div id="home" className={`intro route bg-image ${isPortrait ? "mobile-background" : "background"}`}>
+    <div id="home" className="intro route bg-image contact-background">
     <div className={`wrapper searchDiv ${isPortrait ? "col-md-12" : "col-md-6"}`}></div>
       <div id="stars" /> 
       <div id="stars2" />
@@ -143,9 +142,9 @@ export default function Contact() {
       <div className="intro-content display-table"></div>
       <div className="container">
         <div className="row">
-          <div className="col-sm-12 sect-pt12">
-            <div className="">
-              <div id="contact" className="box-shadow-full pb-3">
+          <div id="contact" className="col-sm-12 sect-pt4">
+            {/* <div className=""> */}
+              <div className="box-shadow-full pb-3">
                 <div className="row">
                   <div className={`wrapper searchDiv ${isPortrait ? "col-md-12" : "col-md-6"}`}>
                     <div className="title-box-2">
@@ -331,7 +330,7 @@ export default function Contact() {
                   }
                 </div>
               </div>
-            </div>
+            {/* </div> */}
           </div>
         </div>
       </div>
