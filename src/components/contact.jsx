@@ -135,8 +135,9 @@ export default function Contact() {
   };
 
   return (
-    <div id="home" className="intro route bg-image background">
-      <div id="stars" />
+    <div id="home" className={`intro route bg-image ${isPortrait ? "mobile-background" : "background"}`}>
+    <div className={`wrapper searchDiv ${isPortrait ? "col-md-12" : "col-md-6"}`}></div>
+      <div id="stars" /> 
       <div id="stars2" />
       <div id="stars3" />
       <div className="intro-content display-table"></div>
