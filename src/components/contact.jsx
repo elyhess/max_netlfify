@@ -142,7 +142,7 @@ export default function Contact() {
       <div className="intro-content display-table"></div>
       <div className="container">
         <div className="row">
-          <div id="contact" className="col-sm-12 sect-pt4">
+          <div id="contact" className="col-sm-12 sect-pt4 contact-mf">
             {/* <div className=""> */}
             <div className="box-shadow-full pb-3">
               <div className="row">
