@@ -1,17 +1,7 @@
 import React from "react";
 import $ from "jquery";
 
-import logo1 from "../img/logo4.webp";
-import logo2 from "../img/logo.webp";
-
 class Navbar extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      logo: logo1
-    };
-  }
-
   componentDidMount() {
     const nav = $("nav");
     let navHeight = nav.outerHeight();

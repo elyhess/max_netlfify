@@ -6,8 +6,6 @@ import sendEmail from "../services/EmailService";
 
 export default function Contact() {
   const isPortrait = useMediaQuery({ query: '(max-width: 768px)' })
-  const MAX_COUNT = 5;
-
   const [name, setName] = useState()
   const [email, setEmail] = useState()
   const [phone, setPhone] = useState()
@@ -18,9 +16,7 @@ export default function Contact() {
   const formFilled = name && email && phone && description && location
   const form = useRef()
   const inputElement = useRef(null)
-
   const [uploadedFiles, setUploadedFiles] = useState([])
-  const [formattedFiles, setFormattedFiles] = useState([])
 
   useEffect(() => {
   }, [uploadedFiles]);
@@ -57,12 +53,12 @@ export default function Contact() {
       })
     );
 
-    console.log("formattedFiles", formattedFiles);
-    const filteredFormattedFiles = formattedFiles.filter(
-      (attachment) => attachment !== null
-    );
+    // console.log("formattedFiles", formattedFiles);
+    // const filteredFormattedFiles = formattedFiles.filter(
+    //   (attachment) => attachment !== null
+    // );
 
-    setFormattedFiles(filteredFormattedFiles);
+    // setFormattedFiles(filteredFormattedFiles);
 
     formattedFiles.forEach((file) => {
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
@@ -101,7 +97,7 @@ export default function Contact() {
     });
     e.target.files = dataTransfer.files
     setAttachmentCount(dataTransfer.files.length)
-    // console.log(attachmentCount)
+    console.log(attachmentCount)
   }
 
   async function handleSubmit(e) {
@@ -132,6 +128,7 @@ export default function Contact() {
       });
       inputElement.current.files = dataTransfer.files;
       setAttachmentCount(dataTransfer.files.length)
+      console.log(attachmentCount)
     }
   };
 
@@ -248,6 +245,7 @@ export default function Contact() {
                                 id="attachmentCount"
                                 value={attachmentCount}
                                 type="number"
+                                readOnly
                                 hidden
                               ></input>
                               {/* hidden */}
