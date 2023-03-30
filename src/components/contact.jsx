@@ -14,6 +14,7 @@ export default function Contact() {
   const [description, setDescription] = useState()
   const [submitted, setSubmitted] = useState(false)
   const [location, setLocation] = useState()
+  const [attachmentCount, setAttachmentCount] = useState(0)
   const formFilled = name && email && phone && description && location
   const form = useRef()
   const inputElement = useRef(null)
@@ -22,7 +23,6 @@ export default function Contact() {
   const [formattedFiles, setFormattedFiles] = useState([])
 
   useEffect(() => {
-    console.log('formattedFiles updated:', uploadedFiles);
   }, [uploadedFiles]);
 
   async function handleUploadFiles(files) {
@@ -67,7 +67,7 @@ export default function Contact() {
     formattedFiles.forEach((file) => {
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
         const updatedSize = newSize + file.size;
-        console.log("update size", updatedSize)
+        // console.log("update size", updatedSize)
         if (updatedSize <= 500000) {
           newSize = updatedSize;
           uploaded.push(file);
@@ -79,7 +79,7 @@ export default function Contact() {
 
     return new Promise((resolve) => {
       setUploadedFiles((prevState) => {
-        console.log("uploaded formatted", uploaded);
+        // console.log("uploaded formatted", uploaded);
         resolve(uploaded);
         return uploaded;
       });
@@ -88,7 +88,7 @@ export default function Contact() {
 
   const handleFileEvent = async (e) => {
     e.persist()
-    console.log("original files", e.target.files)
+    // console.log("original files", e.target.files)
     const chosenFiles = Array.prototype.slice.call(e.target.files)
     const updatedFiles = await handleUploadFiles(chosenFiles);
 
@@ -100,7 +100,8 @@ export default function Contact() {
       dataTransfer.items.add(file);
     });
     e.target.files = dataTransfer.files
-    console.log("compressed files", e.target.files);
+    setAttachmentCount(dataTransfer.files.length)
+    // console.log(attachmentCount)
   }
 
   async function handleSubmit(e) {
@@ -130,6 +131,7 @@ export default function Contact() {
         dataTransfer.items.add(file);
       });
       inputElement.current.files = dataTransfer.files;
+      setAttachmentCount(dataTransfer.files.length)
     }
   };
 
@@ -155,7 +157,9 @@ export default function Contact() {
                       submitted ?
                         (
                           <div id="sendmessage show" className="text-black-50 pb-5">
-                            Your message has been sent. Thank you!
+                            <p>Your message has been sent.</p>
+                            <p>A confirmation email has been sent to {email}</p>
+                            <p>please be sure to check your spam folder!</p>
                           </div>
                         )
                         :
@@ -236,6 +240,18 @@ export default function Contact() {
                                   <div className="validation"></div>
                                 </div>
                               </div>
+
+                              {/* hidden */}
+                              <input
+                                className="form-control"
+                                name="attachmentCount"
+                                id="attachmentCount"
+                                value={attachmentCount}
+                                type="number"
+                                hidden
+                              ></input>
+                              {/* hidden */}
+
                               <div className="col-md-12 mb-3">
                                 <div className="form-group">
                                   <input
@@ -333,7 +349,7 @@ export default function Contact() {
             {/* </div> */}
           </div>
         </div>
-      </div>
+      </div >
       <footer>
         <div className="container">
           <div className="row">
@@ -344,7 +360,7 @@ export default function Contact() {
           </div>
         </div>
       </footer>
-    </section>
+    </section >
   );
 }
 
