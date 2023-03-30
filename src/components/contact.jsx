@@ -212,7 +212,7 @@ export default function Contact() {
                                     rows="5"
                                     id="description"
                                     data-rule="required"
-                                    placeholder="Description - Please be as detailed as possible."
+                                    placeholder="Description - Please be as detailed as possible. &#10;Include links to reference images here."
                                   ></textarea>
                                   <div className="validation"></div>
                                 </div>
