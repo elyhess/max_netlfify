@@ -22,8 +22,6 @@ class Navbar extends React.Component {
           ? target
           : $("[name=" + this.hash.slice(1) + "]");
         if (target.length) {
-          console.log(target.length)
-          console.log(navHeight)
           $("html, body").animate(
             {
               scrollTop: target.offset().top - navHeight + 5

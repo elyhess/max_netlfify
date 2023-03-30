@@ -53,13 +53,6 @@ export default function Contact() {
       })
     );
 
-    // console.log("formattedFiles", formattedFiles);
-    // const filteredFormattedFiles = formattedFiles.filter(
-    //   (attachment) => attachment !== null
-    // );
-
-    // setFormattedFiles(filteredFormattedFiles);
-
     formattedFiles.forEach((file) => {
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
         const updatedSize = newSize + file.size;
@@ -88,7 +81,7 @@ export default function Contact() {
     const chosenFiles = Array.prototype.slice.call(e.target.files)
     const updatedFiles = await handleUploadFiles(chosenFiles);
 
-    console.log("hs-ff", updatedFiles)
+    // console.log("hs-ff", updatedFiles)
 
     const dataTransfer = new DataTransfer();
     updatedFiles.forEach((blob) => {
@@ -97,7 +90,7 @@ export default function Contact() {
     });
     e.target.files = dataTransfer.files
     setAttachmentCount(dataTransfer.files.length)
-    console.log(attachmentCount)
+    // console.log(attachmentCount)
   }
 
   async function handleSubmit(e) {
@@ -128,12 +121,13 @@ export default function Contact() {
       });
       inputElement.current.files = dataTransfer.files;
       setAttachmentCount(dataTransfer.files.length)
-      console.log(attachmentCount)
+      // console.log(attachmentCount)
     }
   };
 
   return (
-    <section id="home" className="intro route bg-image contact-background">
+    <section id="home" className="intro route bg-image">
+      <div className="contact-background">
       <div className={`wrapper searchDiv ${isPortrait ? "col-md-12" : "col-md-6"}`}></div>
       <div id="stars" />
       <div id="stars2" />
@@ -174,8 +168,8 @@ export default function Contact() {
                                     className="form-control"
                                     id="name"
                                     placeholder="Your Name"
-                                    data-rule="minlen:4"
-                                    data-msg="Please enter at least 4 chars"
+                                    data-rule="minlen:1"
+                                    data-msg="Please enter at least 1 characters"
                                   />
                                   <div className="validation"></div>
                                 </div>
@@ -349,6 +343,7 @@ export default function Contact() {
           </div>
         </div>
       </div >
+      </div>
     </section >
   );
 }
