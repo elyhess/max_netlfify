@@ -74,8 +74,8 @@
 }
 
 .contact-background {
-  // overflow: hidden;
   background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
-  height: 1000px;
+  flex: 1;
   min-height: 100vh;
+  // height: 1000px;
 }
