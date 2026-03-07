@@ -5,37 +5,21 @@
   "dependencies": {
     "bootstrap": "^4.3.1",
     "compressorjs": "^1.2.1",
-    "dotenv": "^16.0.2",
-    "emailjs": "^3.8.1",
     "emailjs-com": "^3.2.0",
-    "gh-pages": "^2.2.0",
     "jquery": "^3.4.1",
-    "lightbox2": "^2.11.0",
-    "netlify-lambda": "^2.0.15",
     "node-sass": "^4.12.0",
     "normalize.css": "^8.0.1",
     "popper.js": "^1.15.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-dom-confetti": "^0.2.0",
-    "react-dropzone-uploader": "^2.11.0",
-    "react-infinite-scroll-component": "^6.1.0",
-    "react-optimized-image": "^0.4.1",
     "react-responsive": "^9.0.0-beta.10",
-    "react-scripts": "^3.3.0",
-    "react-typed": "^1.1.2",
-    "typed.js": "^2.0.10",
-    "webp-converter": "^2.3.3",
-    "webp-converter-clientside": "^1.0.1"
+    "react-scripts": "^3.3.0"
   },
   "engines": {
     "npm": ">=6.14.16",
     "node": ">=12.22.12"
   },
   "scripts": {
-    "predeploy": "npm run build",
-    "postinstall": "netlify-lambda install",
-    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -55,5 +39,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.5.0",
+    "react-test-renderer": "^16.14.0"
   }
 }

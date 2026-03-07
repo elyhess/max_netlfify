@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import logo from "../img/logo3.webp";
 import { useMediaQuery } from 'react-responsive'
 import Compressor from "compressorjs";
@@ -17,9 +17,6 @@ export default function Contact() {
   const form = useRef()
   const inputElement = useRef(null)
   const [uploadedFiles, setUploadedFiles] = useState([])
-
-  useEffect(() => {
-  }, [uploadedFiles]);
 
   async function handleUploadFiles(files) {
     const uploaded = [...uploadedFiles];
