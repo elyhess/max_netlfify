@@ -5,9 +5,9 @@ const COMPRESSION_OPTIONS = {
   maxWidth: 600,
 };
 
-const MAX_TOTAL_SIZE = 500000; // 500KB
+const MAX_FILE_COUNT = 6;
 
-export { COMPRESSION_OPTIONS, MAX_TOTAL_SIZE };
+export { COMPRESSION_OPTIONS, MAX_FILE_COUNT };
 
 export async function compressFile(file) {
   return new Promise((resolve) => {
@@ -22,38 +22,39 @@ export async function compressFile(file) {
   });
 }
 
-export async function compressFiles(files) {
-  const results = await Promise.all(files.map(compressFile));
-  return results.filter(Boolean);
-}
-
 export function addFilesWithinLimit(newFiles, existingFiles) {
   const accepted = [];
   const rejected = [];
-  let currentSize = existingFiles.reduce((acc, f) => acc + f.size, 0);
+  let currentCount = existingFiles.length;
 
   for (const file of newFiles) {
     const isDuplicate = existingFiles.some((f) => f.name === file.name);
     if (isDuplicate) continue;
 
-    const updatedSize = currentSize + file.size;
-    if (updatedSize <= MAX_TOTAL_SIZE) {
-      currentSize = updatedSize;
-      accepted.push(file);
-    } else {
+    if (currentCount >= MAX_FILE_COUNT) {
       rejected.push(file);
+      continue;
     }
+
+    currentCount++;
+    accepted.push(file);
   }
 
-  return { accepted, rejected, totalSize: currentSize };
+  return { accepted, rejected };
 }
 
 export async function processUploadedFiles(rawFiles, existingFiles) {
-  const compressed = await compressFiles(rawFiles);
-  const { accepted, rejected, totalSize } = addFilesWithinLimit(compressed, existingFiles);
+  const slotsAvailable = MAX_FILE_COUNT - existingFiles.length;
+
+  // Only compress files we might have room for
+  const filesToProcess = rawFiles.slice(0, Math.max(0, slotsAvailable));
+  const skipped = rawFiles.slice(slotsAvailable);
+
+  const compressed = (await Promise.all(filesToProcess.map(compressFile))).filter(Boolean);
+  const { accepted, rejected } = addFilesWithinLimit(compressed, existingFiles);
+
   return {
     files: [...existingFiles, ...accepted],
-    rejected,
-    totalSize,
+    rejected: [...rejected, ...skipped],
   };
 }

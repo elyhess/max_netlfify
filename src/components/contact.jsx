@@ -22,7 +22,7 @@ export default function Contact() {
     const chosenFiles = Array.prototype.slice.call(e.target.files);
     const { files: updatedFiles, rejected } = await processUploadedFiles(chosenFiles, uploadedFiles);
     if (rejected.length > 0) {
-      alert("The total size of your attachments exceeds 500kb. Some files were not added.");
+      alert("Some files were not added. Maximum 6 files allowed.");
     }
     setUploadedFiles(updatedFiles);
 
