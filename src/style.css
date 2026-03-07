@@ -674,6 +674,11 @@ a:hover {
 .contact-success {
   text-align: center;
   padding: 3rem 1rem;
+  grid-column: 1 / -1;
+}
+
+.contact-form-wrapper:has(.contact-success) {
+  grid-column: 1 / -1;
 }
 
 .success-icon {
@@ -825,6 +830,13 @@ a:hover {
     bottom: 15px;
     width: 40px;
     height: 40px;
+  }
+
+  .hero-buttons .btn-neon-primary {
+    background: var(--gradient-rainbow);
+    background-size: 200%;
+    animation: slidebg 2s linear infinite;
+    box-shadow: 0 4px 20px rgba(244, 29, 207, 0.4);
   }
 }
 
