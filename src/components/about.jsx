@@ -1,12 +1,10 @@
 import React from "react";
 import logo2 from "../img/logo2.webp";
-
-import { useMediaQuery } from 'react-responsive'
-
+import { useMediaQuery } from 'react-responsive';
 
 export default function About() {
-  const isPortrait = useMediaQuery({ query: '(max-width: 768px)' })
-  const imgWidth = isPortrait ? "50%" : "100%"
+  const isPortrait = useMediaQuery({ query: '(max-width: 768px)' });
+  const imgWidth = isPortrait ? "50%" : "100%";
   const data = {
     logo: logo2,
     about_me: [
@@ -42,6 +40,7 @@ export default function About() {
       }
     ]
   };
+
   return (
     <section id="about" className="about-mf sect-pt4 route">
       <div className="container">
@@ -55,7 +54,8 @@ export default function About() {
                       <img
                         src={data.logo}
                         alt="logo"
-                        style={{ width: imgWidth, margin: "0 auto", textAlign: "center" }} />
+                        style={{ width: imgWidth, margin: "0 auto", textAlign: "center" }}
+                      />
                     </div>
                   )}
                 </div>
@@ -66,11 +66,11 @@ export default function About() {
                     </div>
                     {data.about_me.map(content => (
                       <div className="lead" key={content.id}>
-                        <div className="faq-q" key={content.id}>Q: {content.q}</div>
-                        <br></br>
+                        <div className="faq-q">Q: {content.q}</div>
+                        <br />
                         <span className="faq-q">A:</span> {content.a}
-                        <br></br>
-                        <br></br>
+                        <br />
+                        <br />
                       </div>
                     ))}
                   </div>
@@ -83,4 +83,3 @@ export default function About() {
     </section>
   );
 }
-

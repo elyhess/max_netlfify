@@ -1,15 +1,10 @@
-jest.mock('emailjs-com', () => ({
-  sendForm: jest.fn(() => Promise.resolve({ status: 200, text: 'OK' })),
-}));
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-beforeEach(() => {
-  jest.clearAllMocks();
-  jest.resetModules();
-  localStorage.clear();
-  process.env.REACT_APP_EJS_SERVICE = 'test_service';
-  process.env.REACT_APP_EJS_TEMPLATE = 'test_template';
-  process.env.REACT_APP_EJS_PK = 'test_pk';
-});
+vi.mock('@emailjs/browser', () => ({
+  default: {
+    sendForm: vi.fn(() => Promise.resolve({ status: 200, text: 'OK' })),
+  },
+}));
 
 function buildMockForm(fields) {
   const form = document.createElement('form');
@@ -22,11 +17,21 @@ function buildMockForm(fields) {
   return { current: form };
 }
 
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.resetModules();
+  localStorage.clear();
+});
+
 describe('EmailService (production mode)', () => {
-  it('calls emailjs.sendForm with correct parameters', () => {
-    process.env.REACT_APP_MOCK_EMAIL = 'false';
-    const sendEmail = require('../EmailService').default;
-    const emailjs = require('emailjs-com');
+  it('calls emailjs.sendForm with correct parameters', async () => {
+    vi.stubEnv('VITE_MOCK_EMAIL', 'false');
+    vi.stubEnv('VITE_EJS_SERVICE', 'test_service');
+    vi.stubEnv('VITE_EJS_TEMPLATE', 'test_template');
+    vi.stubEnv('VITE_EJS_PK', 'test_pk');
+
+    const { default: sendEmail } = await import('../EmailService.js');
+    const emailjs = (await import('@emailjs/browser')).default;
     const mockForm = buildMockForm({ firstName: 'John', email: 'john@test.com' });
     sendEmail(mockForm);
     expect(emailjs.sendForm).toHaveBeenCalledWith(
@@ -39,18 +44,20 @@ describe('EmailService (production mode)', () => {
 });
 
 describe('EmailService (mock mode)', () => {
-  it('does not call emailjs.sendForm', () => {
-    process.env.REACT_APP_MOCK_EMAIL = 'true';
-    const sendEmail = require('../EmailService').default;
-    const emailjs = require('emailjs-com');
+  beforeEach(() => {
+    vi.stubEnv('VITE_MOCK_EMAIL', 'true');
+  });
+
+  it('does not call emailjs.sendForm', async () => {
+    const { default: sendEmail } = await import('../EmailService.js');
+    const emailjs = (await import('@emailjs/browser')).default;
     const mockForm = buildMockForm({ firstName: 'John', email: 'john@test.com' });
     sendEmail(mockForm);
     expect(emailjs.sendForm).not.toHaveBeenCalled();
   });
 
-  it('saves submission to localStorage', () => {
-    process.env.REACT_APP_MOCK_EMAIL = 'true';
-    const sendEmail = require('../EmailService').default;
+  it('saves submission to localStorage', async () => {
+    const { default: sendEmail } = await import('../EmailService.js');
     const mockForm = buildMockForm({ firstName: 'John', email: 'john@test.com', phone: '555-1234' });
     sendEmail(mockForm);
 
@@ -62,9 +69,8 @@ describe('EmailService (mock mode)', () => {
     expect(submissions[0].timestamp).toBeDefined();
   });
 
-  it('appends to existing submissions', () => {
-    process.env.REACT_APP_MOCK_EMAIL = 'true';
-    const sendEmail = require('../EmailService').default;
+  it('appends to existing submissions', async () => {
+    const { default: sendEmail } = await import('../EmailService.js');
     sendEmail(buildMockForm({ firstName: 'John' }));
     sendEmail(buildMockForm({ firstName: 'Jane' }));
 
@@ -75,8 +81,7 @@ describe('EmailService (mock mode)', () => {
   });
 
   it('returns a resolved promise', async () => {
-    process.env.REACT_APP_MOCK_EMAIL = 'true';
-    const sendEmail = require('../EmailService').default;
+    const { default: sendEmail } = await import('../EmailService.js');
     const result = await sendEmail(buildMockForm({ firstName: 'John' }));
     expect(result.status).toBe(200);
     expect(result.text).toBe('OK (mock)');

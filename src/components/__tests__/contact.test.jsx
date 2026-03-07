@@ -1,17 +1,19 @@
 import React from 'react';
-import '@testing-library/jest-dom/extend-expect';
 import { render, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import Contact from '../contact';
 
-jest.mock('react-responsive', () => ({
+vi.mock('react-responsive', () => ({
   useMediaQuery: () => false,
 }));
 
-jest.mock('../../services/EmailService', () => jest.fn());
+vi.mock('../../services/EmailService', () => ({
+  default: vi.fn(),
+}));
 
-jest.mock('compressorjs', () => {
-  return jest.fn();
-});
+vi.mock('compressorjs', () => ({
+  default: vi.fn(),
+}));
 
 describe('Contact', () => {
   it('renders the form heading', () => {

@@ -1,6 +1,6 @@
-import emailjs from 'emailjs-com';
+import emailjs from '@emailjs/browser';
 
-const MOCK_ENABLED = process.env.REACT_APP_MOCK_EMAIL === 'true';
+const MOCK_ENABLED = import.meta.env.VITE_MOCK_EMAIL === 'true';
 const STORAGE_KEY = 'mock_email_submissions';
 
 function getFormData(formEl) {
@@ -38,10 +38,14 @@ export default function sendEmail(form) {
       return mockSendEmail(form);
    }
 
-   emailjs.sendForm(process.env.REACT_APP_EJS_SERVICE, process.env.REACT_APP_EJS_TEMPLATE, form.current, process.env.REACT_APP_EJS_PK)
-      .then(function (response) {
-         console.log('SUCCESS!', response.status, response.text);
-      }, function (err) {
-         console.log('FAILED...', err);
-      });
-};
+   emailjs.sendForm(
+      import.meta.env.VITE_EJS_SERVICE,
+      import.meta.env.VITE_EJS_TEMPLATE,
+      form.current,
+      import.meta.env.VITE_EJS_PK
+   ).then(function (response) {
+      console.log('SUCCESS!', response.status, response.text);
+   }, function (err) {
+      console.log('FAILED...', err);
+   });
+}

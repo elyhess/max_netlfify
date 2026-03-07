@@ -1,12 +1,11 @@
 import React from "react";
 import "./stars.scss";
 import logo from "../img/logo5.png";
-import { useMediaQuery } from 'react-responsive'
+import { useMediaQuery } from 'react-responsive';
 
 export default function Intro() {
-  const isPortrait = useMediaQuery({ query: '(max-width: 750px)' })
-
-  const imgWidth = isPortrait ? "50%" : "20%"
+  const isPortrait = useMediaQuery({ query: '(max-width: 750px)' });
+  const imgWidth = isPortrait ? "50%" : "20%";
 
   return (
     <div id="home" className="intro route bg-image background">
@@ -14,37 +13,22 @@ export default function Intro() {
       <div id="stars2" />
       <div id="stars3" />
 
-
       <div className="intro-content display-table">
         <div className="table-cell">
           <div className="container mb-25">
             <span className="text-slider-items"></span>
-            {isPortrait ? (
-              <div className="row pb-4">
-                <img
-                  src={logo}
-                  alt="logo"
-                  style={{
-                    width: imgWidth,
-                    margin: "0 auto",
-                    textAlign: "center",
-                    transform: "rotate(05deg)", // Add rotation here
-                  }} />
-              </div>
-            ) : (
-              <div className="row pb-4 mb-18">
-                <img
-                  src={logo}
-                  alt="logo"
-                  style={{
-                    width: imgWidth,
-                    margin: "0 auto",
-                    textAlign: "center",
-                    transform: "rotate(05deg)", // Add rotation here
-                  }}
-                />
-              </div>
-            )}
+            <div className={`row ${isPortrait ? 'pb-4' : 'pb-4 mb-18'}`}>
+              <img
+                src={logo}
+                alt="logo"
+                style={{
+                  width: imgWidth,
+                  margin: "0 auto",
+                  textAlign: "center",
+                  transform: "rotate(05deg)",
+                }}
+              />
+            </div>
             <h1 className="intro-title">MAX VK TATTOOS</h1>
             <p className="pt-3">
               <a
@@ -67,7 +51,6 @@ export default function Intro() {
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }
-

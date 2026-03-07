@@ -1,46 +1,27 @@
-import React from "react";
-import $ from "jquery";
+import React, { useEffect, useRef } from "react";
 
-class Navbar extends React.Component {
-  componentDidMount() {
-    const nav = $("nav");
-    let navHeight = nav.outerHeight();
+export default function Navbar() {
+  const navRef = useRef(null);
 
-    $("body").scrollspy({
-      target: "#mainNav",
-      offset: navHeight
-    });
-
-    $('a.js-scroll[href*="#"]:not([href="#"])').on("click", function () {
-      if (
-        window.location.pathname.replace(/^\//, "") ===
-        this.pathname.replace(/^\//, "") &&
-        window.location.hostname === this.hostname
-      ) {
-        var target = $(this.hash);
-        target = target.length
-          ? target
-          : $("[name=" + this.hash.slice(1) + "]");
-        if (target.length) {
-          $("html, body").animate(
-            {
-              scrollTop: target.offset().top - navHeight + 5
-            },
-            1000,
-            "easeInExpo"
-          );
-          return false;
-        }
+  useEffect(() => {
+    function handleSmoothScroll(e) {
+      const href = e.currentTarget.getAttribute("href");
+      if (!href || !href.startsWith("#") || href === "#") return;
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        const navHeight = navRef.current ? navRef.current.offsetHeight : 0;
+        const top = target.getBoundingClientRect().top + window.pageYOffset - navHeight + 5;
+        window.scrollTo({ top, behavior: "smooth" });
       }
-    });
-  }
+    }
 
-  render() {
-    return (
-      <nav id="mainNav">
-      </nav>
-    );
-  }
+    const links = document.querySelectorAll('a.js-scroll[href*="#"]:not([href="#"])');
+    links.forEach((link) => link.addEventListener("click", handleSmoothScroll));
+    return () => {
+      links.forEach((link) => link.removeEventListener("click", handleSmoothScroll));
+    };
+  }, []);
+
+  return <nav id="mainNav" ref={navRef}></nav>;
 }
-
-export default Navbar;

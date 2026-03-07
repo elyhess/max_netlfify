@@ -1,9 +1,9 @@
 import React from 'react';
-import '@testing-library/jest-dom/extend-expect';
 import { render } from '@testing-library/react';
+import { vi } from 'vitest';
 import About from '../about';
 
-jest.mock('react-responsive', () => ({
+vi.mock('react-responsive', () => ({
   useMediaQuery: () => false,
 }));
 
@@ -16,7 +16,6 @@ describe('About', () => {
   it('renders all 6 FAQ questions', () => {
     const { container } = render(<About />);
     const questions = container.querySelectorAll('.faq-q');
-    // Each Q&A has a "Q:" div and an "A:" span = 12 total
     expect(questions.length).toBe(12);
   });
 
