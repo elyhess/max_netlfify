@@ -1,9 +1,43 @@
 import emailjs from 'emailjs-com';
 
-export default function sendEmail(form) {
-   console.log(form)
+const MOCK_ENABLED = process.env.REACT_APP_MOCK_EMAIL === 'true';
+const STORAGE_KEY = 'mock_email_submissions';
 
-   // send the message and get a callback with an error or details of the message that was sent
+function getFormData(formEl) {
+   const data = {};
+   new FormData(formEl).forEach((value, key) => {
+      if (key === 'attachments') {
+         if (!data.attachments) data.attachments = [];
+         data.attachments.push({ name: value.name, size: value.size, type: value.type });
+      } else {
+         data[key] = value;
+      }
+   });
+   return data;
+}
+
+function mockSendEmail(form) {
+   const formData = getFormData(form.current);
+   const entry = {
+      timestamp: new Date().toISOString(),
+      data: formData
+   };
+
+   const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+   existing.push(entry);
+   localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+
+   console.log('[MOCK EMAIL] Submission saved to localStorage:', entry);
+   console.log('[MOCK EMAIL] View all submissions: JSON.parse(localStorage.getItem("' + STORAGE_KEY + '"))');
+
+   return Promise.resolve({ status: 200, text: 'OK (mock)' });
+}
+
+export default function sendEmail(form) {
+   if (MOCK_ENABLED) {
+      return mockSendEmail(form);
+   }
+
    emailjs.sendForm(process.env.REACT_APP_EJS_SERVICE, process.env.REACT_APP_EJS_TEMPLATE, form.current, process.env.REACT_APP_EJS_PK)
       .then(function (response) {
          console.log('SUCCESS!', response.status, response.text);
