@@ -76,7 +76,7 @@ export default function Contact() {
         <div className="section-header">
           <h2 className="section-title">Get In Touch</h2>
           <p className="section-subtitle">
-            Ready to book? Send a message below
+            Books open a few times a year &mdash; don&rsquo;t miss your window
           </p>
         </div>
         <div className="contact-layout">
@@ -222,7 +222,11 @@ export default function Contact() {
             {!submitted && (
               <div className="glass-card contact-info-card">
                 <h3>MAX VK TATTOOS</h3>
-                <p>Please read the FAQ before reaching out</p>
+                <p>
+                  No realism, no black-and-grey, no reworks &mdash; just
+                  original art built from scratch. Please read the FAQ before
+                  reaching out.
+                </p>
                 <div className="contact-links">
                   <a
                     href="https://www.instagram.com/maxvktattoos/"

@@ -10,7 +10,7 @@ const faqData = [
   {
     id: "2",
     q: "When do you open your books?",
-    a: "I open my books for approximately 5-7 days every 2-3 months. Turn on post notifications on IG to make sure you don't miss it. I always give a heads up when I am going to open my books.",
+    a: "I keep my books open only a few times a year for a limited window. Turn on post notifications on IG to make sure you don't miss it. I always give a heads up when I am going to open my books.",
   },
   {
     id: "3",
@@ -20,17 +20,17 @@ const faqData = [
   {
     id: "4",
     q: "What types of projects do you take on?",
-    a: "Anything that fits in my style of art. Trippy, disco, bright and colorful, etc. Look at my IG for the types of things I like to do.",
+    a: "Anything that aligns with my vibrant style — trippy, disco-infused, bright and colorful. My work is playful, psychedelic, and unapologetically its own lane. Check my IG for examples.",
   },
   {
     id: "5",
     q: "What won't you tattoo?",
-    a: "Anything that is not my style (i.e. realism, black and grey, script). I also do not under any circumstances finish, fix, or work on other artists work.",
+    a: "No realism, no black-and-grey, no reworks — just original art straight from the heart and imagination, built from scratch. I do not under any circumstances finish, fix, or work on other artists' work.",
   },
   {
     id: "6",
     q: "I sent a great idea but didn't hear back, why?",
-    a: "I am only one person with a limited amount of time to book clients, I simply cannot book everyone every time I open my books. If you didn't get in the first time, please keep submitting ideas!",
+    a: "I am only one person with a limited amount of time to book clients. I simply cannot book everyone every time I open my books. If you didn't get in the first time, please keep submitting ideas!",
   },
 ];
 
@@ -46,7 +46,9 @@ export default function About() {
       <div className="container">
         <div className="section-header">
           <h2 className="section-title">FAQ</h2>
-          <p className="section-subtitle">Everything you need to know</p>
+          <p className="section-subtitle">
+            Original art from the heart &amp; imagination
+          </p>
         </div>
         <div className="faq-layout">
           <div className="faq-list">

@@ -22,7 +22,9 @@ export default function Gallery() {
       <div className="container">
         <div className="section-header">
           <h2 className="section-title">Gallery</h2>
-          <p className="section-subtitle">Custom tattoo work</p>
+          <p className="section-subtitle">
+            Playful, psychedelic, and unapologetically its own lane
+          </p>
         </div>
         <div className="gallery-grid">
           {galleryItems.map((item) => (

@@ -9,7 +9,14 @@ export default function Intro() {
           <img src={logo} alt="logo" className="hero-logo" />
         </div>
         <h1 className="hero-title">MAX VK TATTOOS</h1>
-        <p className="hero-subtitle">Trippy &bull; Colorful &bull; Custom</p>
+        <p className="hero-subtitle">
+          Bold &bull; Trippy &bull; Disco-Infused
+        </p>
+        <p className="hero-bio">
+          Denver-based multi-hyphenate creative &mdash; DJ, artist, and
+          dedicated tattoo artist known for iconic designs bursting with bright
+          color &amp; movement.
+        </p>
         <div className="hero-buttons">
           <a className="btn-neon btn-neon-primary js-scroll" href="#contact">
             Book Now
