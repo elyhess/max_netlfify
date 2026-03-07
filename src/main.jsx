@@ -2,7 +2,6 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import 'bootstrap/dist/css/bootstrap.css';
-import './components/stars.scss';
 import './style.css';
 
 import Navbar from './components/navbar.jsx';
@@ -12,14 +11,19 @@ import About from './components/about.jsx';
 import Contact from './components/contact.jsx';
 import BackToTop from './components/back-top.jsx';
 import Preloader from './components/preloader.jsx';
+import Stars from './components/Stars.jsx';
+import floatingLogo from './img/logo5.png';
 
 createRoot(document.getElementById('root')).render(
   <React.Fragment>
     <Navbar />
+    <img src={floatingLogo} alt="" className="floating-logo fl-1" />
+    <img src={floatingLogo} alt="" className="floating-logo fl-2" />
+    <img src={floatingLogo} alt="" className="floating-logo fl-3" />
+    <img src={floatingLogo} alt="" className="floating-logo fl-4" />
+    <img src={floatingLogo} alt="" className="floating-logo fl-5" />
     <div className="site-wrapper">
-      <div id="stars" />
-      <div id="stars2" />
-      <div id="stars3" />
+      <Stars />
       <Intro />
       <Gallery />
       <About />

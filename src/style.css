@@ -55,13 +55,64 @@ a:hover {
   overflow: hidden;
 }
 
-#stars, #stars2, #stars3 {
+.stars-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  animation: cosmicPulse 30s ease-in-out infinite;
+}
+
+.star-layer {
   position: fixed;
   top: 0;
   left: 0;
   pointer-events: none;
   z-index: 0;
+  background: transparent;
+  border-radius: 50%;
 }
+
+@keyframes animStar {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-2000px); }
+}
+
+@keyframes cosmicPulse {
+  0%, 88%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: brightness(1);
+  }
+  93% {
+    transform: scale(1.04) rotate(0.8deg);
+    filter: brightness(1.4);
+  }
+  96% {
+    transform: scale(0.99) rotate(-0.3deg);
+    filter: brightness(1.1);
+  }
+}
+
+/* Floating logos mixed with stars */
+.floating-logo {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+  top: 100%;
+  filter: blur(0.8px);
+  opacity: 0.6;
+  animation: animStar linear infinite;
+}
+
+.fl-1 { width: 42px; left: 7%;  animation-duration: 50s; animation-delay: -10s; }
+.fl-2 { width: 32px; left: 88%; animation-duration: 100s; animation-delay: -45s; }
+.fl-3 { width: 50px; left: 22%; animation-duration: 150s; animation-delay: -80s; }
+.fl-4 { width: 26px; left: 52%; animation-duration: 70s; animation-delay: -30s; }
+.fl-5 { width: 38px; left: 72%; animation-duration: 120s; animation-delay: -95s; }
 
 /* ===== GLASS CARD ===== */
 .glass-card {
