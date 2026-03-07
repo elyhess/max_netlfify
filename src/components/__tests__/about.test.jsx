@@ -3,10 +3,6 @@ import { render } from '@testing-library/react';
 import { vi } from 'vitest';
 import About from '../about';
 
-vi.mock('react-responsive', () => ({
-  useMediaQuery: () => false,
-}));
-
 describe('About', () => {
   it('renders the FAQ heading', () => {
     const { getByText } = render(<About />);
@@ -15,8 +11,8 @@ describe('About', () => {
 
   it('renders all 6 FAQ questions', () => {
     const { container } = render(<About />);
-    const questions = container.querySelectorAll('.faq-q');
-    expect(questions.length).toBe(12);
+    const questions = container.querySelectorAll('.faq-item');
+    expect(questions.length).toBe(6);
   });
 
   it('renders first question text', () => {

@@ -3,10 +3,6 @@ import { render, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import Contact from '../contact';
 
-vi.mock('react-responsive', () => ({
-  useMediaQuery: () => false,
-}));
-
 vi.mock('../../services/EmailService', () => ({
   default: vi.fn(),
 }));
@@ -18,7 +14,7 @@ vi.mock('../../services/imageCompressor', () => ({
 describe('Contact', () => {
   it('renders the form heading', () => {
     const { getByText } = render(<Contact />);
-    expect(getByText('Send A Message')).toBeInTheDocument();
+    expect(getByText('Get In Touch')).toBeInTheDocument();
   });
 
   it('renders all form fields', () => {
@@ -27,49 +23,46 @@ describe('Contact', () => {
     expect(getByPlaceholderText('Your Email')).toBeInTheDocument();
     expect(getByPlaceholderText('Phone Number')).toBeInTheDocument();
     expect(getByPlaceholderText(/Description/)).toBeInTheDocument();
-    expect(getByPlaceholderText('Location & size')).toBeInTheDocument();
+    expect(getByPlaceholderText(/Placement/)).toBeInTheDocument();
   });
 
   it('renders disabled submit button when form is empty', () => {
     const { getByText } = render(<Contact />);
     const button = getByText('Send Message');
-    expect(button).toHaveClass('disable-button');
+    expect(button).toHaveClass('btn-disabled');
   });
 
   it('enables submit button when all fields are filled', () => {
-    const { getByPlaceholderText, getAllByText } = render(<Contact />);
+    const { getByPlaceholderText, getByText } = render(<Contact />);
 
     fireEvent.change(getByPlaceholderText('Your Name'), { target: { value: 'John' } });
     fireEvent.change(getByPlaceholderText('Your Email'), { target: { value: 'john@test.com' } });
     fireEvent.change(getByPlaceholderText('Phone Number'), { target: { value: '1234567890' } });
     fireEvent.change(getByPlaceholderText(/Description/), { target: { value: 'A tattoo idea' } });
-    fireEvent.change(getByPlaceholderText('Location & size'), { target: { value: 'Arm, medium' } });
+    fireEvent.change(getByPlaceholderText(/Placement/), { target: { value: 'Arm, medium' } });
 
-    const buttons = getAllByText('Send Message');
-    const submitButton = buttons.find(b => b.getAttribute('type') === 'submit');
+    const submitButton = getByText('Send Message');
     expect(submitButton).toBeInTheDocument();
-    expect(submitButton).toHaveClass('btn-primary');
+    expect(submitButton).not.toHaveClass('btn-disabled');
   });
 
   it('shows confirmation after submit', () => {
-    const { getByPlaceholderText, getAllByText, getByText } = render(<Contact />);
+    const { getByPlaceholderText, getByText } = render(<Contact />);
 
     fireEvent.change(getByPlaceholderText('Your Name'), { target: { value: 'John' } });
     fireEvent.change(getByPlaceholderText('Your Email'), { target: { value: 'john@test.com' } });
     fireEvent.change(getByPlaceholderText('Phone Number'), { target: { value: '1234567890' } });
     fireEvent.change(getByPlaceholderText(/Description/), { target: { value: 'A tattoo idea' } });
-    fireEvent.change(getByPlaceholderText('Location & size'), { target: { value: 'Arm, medium' } });
+    fireEvent.change(getByPlaceholderText(/Placement/), { target: { value: 'Arm, medium' } });
 
-    const buttons = getAllByText('Send Message');
-    const submitButton = buttons.find(b => b.getAttribute('type') === 'submit');
-    fireEvent.click(submitButton);
+    fireEvent.click(getByText('Send Message'));
 
-    expect(getByText('Your message has been sent.')).toBeInTheDocument();
+    expect(getByText('Message Sent!')).toBeInTheDocument();
   });
 
-  it('renders Upload Images button', () => {
+  it('renders Upload Reference Images button', () => {
     const { getByText } = render(<Contact />);
-    expect(getByText('Upload Images')).toBeInTheDocument();
+    expect(getByText('Upload Reference Images')).toBeInTheDocument();
   });
 
   it('renders the sidebar info on desktop', () => {

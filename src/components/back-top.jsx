@@ -22,18 +22,17 @@ export default function BackToTop() {
       className="back-to-top"
       onClick={scrollToTop}
       style={{
-        display: visible ? "block" : "none",
+        display: visible ? "flex" : "none",
         opacity: visible ? 1 : 0,
         transition: "opacity 0.3s",
       }}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
+        width="18"
+        height="18"
         fill="currentColor"
         viewBox="0 0 16 16"
-        style={{ paddingTop: "12px" }}
       >
         <path
           fillRule="evenodd"

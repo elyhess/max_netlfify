@@ -3,20 +3,16 @@ import { render } from '@testing-library/react';
 import { vi } from 'vitest';
 import Intro from '../intro';
 
-vi.mock('react-responsive', () => ({
-  useMediaQuery: () => false,
-}));
-
 describe('Intro', () => {
   it('renders the title', () => {
     const { getByText } = render(<Intro />);
     expect(getByText('MAX VK TATTOOS')).toBeInTheDocument();
   });
 
-  it('renders Contact and FAQ buttons', () => {
+  it('renders Book Now and View Work buttons', () => {
     const { getByText } = render(<Intro />);
-    expect(getByText('Contact')).toBeInTheDocument();
-    expect(getByText('FAQ')).toBeInTheDocument();
+    expect(getByText('Book Now')).toBeInTheDocument();
+    expect(getByText('View Work')).toBeInTheDocument();
   });
 
   it('renders the logo image', () => {
@@ -24,13 +20,13 @@ describe('Intro', () => {
     expect(getByAltText('logo')).toBeInTheDocument();
   });
 
-  it('Contact button links to #contact', () => {
+  it('Book Now button links to #contact', () => {
     const { getByText } = render(<Intro />);
-    expect(getByText('Contact').closest('a')).toHaveAttribute('href', '#contact');
+    expect(getByText('Book Now').closest('a')).toHaveAttribute('href', '#contact');
   });
 
-  it('FAQ button links to #about', () => {
+  it('View Work button links to #gallery', () => {
     const { getByText } = render(<Intro />);
-    expect(getByText('FAQ').closest('a')).toHaveAttribute('href', '#about');
+    expect(getByText('View Work').closest('a')).toHaveAttribute('href', '#gallery');
   });
 });

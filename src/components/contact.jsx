@@ -1,11 +1,8 @@
 import React, { useRef, useState } from "react";
-import logo from "../img/logo3.webp";
-import { useMediaQuery } from 'react-responsive';
 import sendEmail from "../services/EmailService";
 import { processUploadedFiles } from "../services/imageCompressor";
 
 export default function Contact() {
-  const isPortrait = useMediaQuery({ query: '(max-width: 768px)' });
   const [name, setName] = useState();
   const [email, setEmail] = useState();
   const [phone, setPhone] = useState();
@@ -20,7 +17,10 @@ export default function Contact() {
 
   const handleFileEvent = async (e) => {
     const chosenFiles = Array.prototype.slice.call(e.target.files);
-    const { files: updatedFiles, rejected } = await processUploadedFiles(chosenFiles, uploadedFiles);
+    const { files: updatedFiles, rejected } = await processUploadedFiles(
+      chosenFiles,
+      uploadedFiles
+    );
     if (rejected.length > 0) {
       alert("Some files were not added. Maximum 6 files allowed.");
     }
@@ -42,17 +42,21 @@ export default function Contact() {
       sendEmail(form);
     } catch (e) {
       console.error(e);
-      alert('Your message could not be sent. Sorry about that.');
+      alert("Your message could not be sent. Sorry about that.");
     }
   }
 
   function getFileName(str) {
-    if (str.length > 12) { return str.substr(0, 6) + '...' + str.substr(-6); }
+    if (str.length > 12) {
+      return str.substr(0, 6) + "..." + str.substr(-6);
+    }
     return str;
   }
 
   const deleteFile = (fileName) => {
-    const updatedUploadedFiles = uploadedFiles.filter((file) => file.name !== fileName);
+    const updatedUploadedFiles = uploadedFiles.filter(
+      (file) => file.name !== fileName
+    );
     setUploadedFiles(updatedUploadedFiles);
 
     if (inputElement.current) {
@@ -67,183 +71,184 @@ export default function Contact() {
   };
 
   return (
-    <section id="home" className="intro route bg-image">
-      <div className="contact-background">
-        <div className={`wrapper searchDiv ${isPortrait ? "col-md-12" : "col-md-6"}`}></div>
-        <div id="stars" />
-        <div id="stars2" />
-        <div id="stars3" />
-        <div className="intro-content display-table"></div>
-        <div className="container">
-          <div className="row">
-            <div id="contact" className="col-sm-12 sect-pt4 contact-mf">
-              <div className="box-shadow-full pb-3">
-                <div className="row">
-                  <div className={`wrapper searchDiv ${isPortrait ? "col-md-12" : "col-md-6"}`}>
-                    <div className="title-box-2">
-                      <h5 className="title-left">Send A Message</h5>
-                    </div>
-                    <div>
-                      {submitted ? (
-                        <div id="sendmessage show" className="text-black-50 pb-5">
-                          <p>Your message has been sent.</p>
-                          <p>A confirmation email has been sent to {email}</p>
-                          <p>please be sure to check your spam folder!</p>
-                        </div>
-                      ) : (
-                        <div>
-                          <form onSubmit={(e) => handleSubmit(e)} ref={form} id="contactForm" className="contactForm">
-                            <div id="errormessage"></div>
-                            <div className="row">
-                              <div className="col-md-12 mb-3">
-                                <div className="mb-3">
-                                  <input
-                                    type="text"
-                                    name="firstName"
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="form-control"
-                                    id="name"
-                                    placeholder="Your Name"
-                                  />
-                                </div>
-                              </div>
-                              <div className="col-md-12 mb-3">
-                                <div className="mb-3">
-                                  <input
-                                    type="email"
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="form-control"
-                                    name="email"
-                                    id="email"
-                                    placeholder="Your Email"
-                                  />
-                                </div>
-                              </div>
-                              <div className="col-md-12 mb-3">
-                                <div className="mb-3">
-                                  <input
-                                    type="text"
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    className="form-control"
-                                    name="phone"
-                                    id="phone"
-                                    placeholder="Phone Number"
-                                  />
-                                </div>
-                              </div>
-                              <div className="col-md-12 mb-3">
-                                <div className="mb-3">
-                                  <textarea
-                                    className="form-control"
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    name="description"
-                                    rows="5"
-                                    id="description"
-                                    placeholder="Description - Please be as detailed as possible. &#10;Include links to reference images here."
-                                  ></textarea>
-                                </div>
-                              </div>
-                              <div className="col-md-12 mb-3">
-                                <div className="mb-3">
-                                  <textarea
-                                    className="form-control"
-                                    name="location"
-                                    onChange={(e) => setLocation(e.target.value)}
-                                    rows="2"
-                                    id="location"
-                                    placeholder="Location & size"
-                                  ></textarea>
-                                </div>
-                              </div>
-
-                              <input
-                                className="form-control"
-                                name="attachmentCount"
-                                id="attachmentCount"
-                                value={attachmentCount}
-                                type="number"
-                                readOnly
-                                hidden
-                              />
-
-                              <div className="col-md-12 mb-3">
-                                <div className="mb-3">
-                                  <input
-                                    role="button"
-                                    hidden
-                                    id="attachments"
-                                    type="file"
-                                    multiple
-                                    name="attachments"
-                                    accept=".heic, .jpeg, .jpg, .png, .webp"
-                                    onChange={handleFileEvent}
-                                    ref={inputElement}
-                                  />
-                                  <label htmlFor="attachments">
-                                    <div className="btn btn-primary">Upload Images</div>
-                                  </label>
-                                  <div className="uploaded-files-list text-black-50">
-                                    {uploadedFiles.map(file => (
-                                      <div className="row" key={file.name}>
-                                        <div className="col-8">
-                                          {getFileName(file.name)} - {file.size.toLocaleString("en-US")} kb
-                                        </div>
-                                        <div className="col-4">
-                                          <button
-                                            type="button"
-                                            className="btn-close"
-                                            style={{ color: "red" }}
-                                            aria-label="Close"
-                                            onClick={() => deleteFile(file.name)}
-                                          />
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="col-md-12 mb-3">
-                                <div className="mb-3">
-                                  {formFilled ? (
-                                    <button
-                                      type="submit"
-                                      className="button-big btn-primary btn rainbow-button btn"
-                                    >
-                                      Send Message
-                                    </button>
-                                  ) : (
-                                    <button className="button button-big disable-button">
-                                      Send Message
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </form>
-                        </div>
-                      )}
-                    </div>
+    <section id="contact" className="section-padding">
+      <div className="container">
+        <div className="section-header">
+          <h2 className="section-title">Get In Touch</h2>
+          <p className="section-subtitle">
+            Ready to book? Send a message below
+          </p>
+        </div>
+        <div className="contact-layout">
+          <div className="contact-form-wrapper glass-card">
+            {submitted ? (
+              <div className="contact-success">
+                <div className="success-icon">&#10003;</div>
+                <h3>Message Sent!</h3>
+                <p>A confirmation email has been sent to {email}</p>
+                <p>Please check your spam folder!</p>
+              </div>
+            ) : (
+              <form
+                onSubmit={handleSubmit}
+                ref={form}
+                id="contactForm"
+                className="contactForm"
+              >
+                <div className="form-grid">
+                  <div className="form-field">
+                    <input
+                      type="text"
+                      name="firstName"
+                      onChange={(e) => setName(e.target.value)}
+                      className="input-dark"
+                      id="name"
+                      placeholder="Your Name"
+                    />
                   </div>
-                  {isPortrait || submitted ? (
-                    <div></div>
-                  ) : (
-                    <div className="col-md-6">
-                      <div className="title-box-2 pt-4 pt-md-0">
-                        <h5 className="title-left">MAX VK TATTOOS</h5>
+                  <div className="form-field">
+                    <input
+                      type="email"
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="input-dark"
+                      name="email"
+                      id="email"
+                      placeholder="Your Email"
+                    />
+                  </div>
+                  <div className="form-field full-width">
+                    <input
+                      type="text"
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="input-dark"
+                      name="phone"
+                      id="phone"
+                      placeholder="Phone Number"
+                    />
+                  </div>
+                  <div className="form-field full-width">
+                    <textarea
+                      className="input-dark"
+                      onChange={(e) => setDescription(e.target.value)}
+                      name="description"
+                      rows="4"
+                      id="description"
+                      placeholder="Description &mdash; Be as detailed as possible. Include links to reference images."
+                    />
+                  </div>
+                  <div className="form-field full-width">
+                    <textarea
+                      className="input-dark"
+                      name="location"
+                      onChange={(e) => setLocation(e.target.value)}
+                      rows="2"
+                      id="location"
+                      placeholder="Placement & size"
+                    />
+                  </div>
+
+                  <input
+                    name="attachmentCount"
+                    id="attachmentCount"
+                    value={attachmentCount}
+                    type="number"
+                    readOnly
+                    hidden
+                  />
+
+                  <div className="form-field full-width">
+                    <input
+                      role="button"
+                      hidden
+                      id="attachments"
+                      type="file"
+                      multiple
+                      name="attachments"
+                      accept=".heic, .jpeg, .jpg, .png, .webp"
+                      onChange={handleFileEvent}
+                      ref={inputElement}
+                    />
+                    <label htmlFor="attachments" className="upload-label">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                      </svg>
+                      Upload Reference Images
+                    </label>
+                    {uploadedFiles.length > 0 && (
+                      <div className="uploaded-files">
+                        {uploadedFiles.map((file) => (
+                          <div className="uploaded-file" key={file.name}>
+                            <span className="file-name">
+                              {getFileName(file.name)} &mdash;{" "}
+                              {(file.size / 1024).toFixed(0)}KB
+                            </span>
+                            <button
+                              type="button"
+                              className="file-remove"
+                              aria-label="Remove file"
+                              onClick={() => deleteFile(file.name)}
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                      <div className="more-info">
-                        <li className="lead text-black-50">Please read the FAQ before reaching out</li>
-                      </div>
-                      <div className="socials"></div>
-                      <div className="text-center">
-                        <img src={logo} alt="logo" style={{ maxWidth: "70%" }} />
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
+
+                  <div className="form-field full-width">
+                    <button
+                      type="submit"
+                      className={`btn-neon btn-neon-primary btn-submit ${!formFilled ? "btn-disabled" : ""}`}
+                      disabled={!formFilled}
+                    >
+                      Send Message
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </div>
+          <div className="contact-info hidden-mobile">
+            {!submitted && (
+              <div className="glass-card contact-info-card">
+                <h3>MAX VK TATTOOS</h3>
+                <p>Please read the FAQ before reaching out</p>
+                <div className="contact-links">
+                  <a
+                    href="https://www.instagram.com/maxvktattoos/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                    </svg>
+                    @maxvktattoos
+                  </a>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
