@@ -1,8 +1,8 @@
 import React, { useRef, useState } from "react";
 import logo from "../img/logo3.webp";
 import { useMediaQuery } from 'react-responsive';
-import Compressor from "compressorjs";
 import sendEmail from "../services/EmailService";
+import { processUploadedFiles } from "../services/imageCompressor";
 
 export default function Contact() {
   const isPortrait = useMediaQuery({ query: '(max-width: 768px)' });
@@ -18,59 +18,13 @@ export default function Contact() {
   const inputElement = useRef(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
-  async function handleUploadFiles(files) {
-    const uploaded = [...uploadedFiles];
-    let newSize = uploaded.reduce((acc, file) => acc + file.size, 0);
-
-    const options = {
-      quality: 0.2,
-      maxWidth: 600
-    };
-
-    const formattedFiles = await Promise.all(
-      files.map(async (file) => {
-        try {
-          const compressedFile = await new Promise((resolve) => {
-            new Compressor(file, {
-              ...options,
-              success: (result) => resolve(result),
-              error: (err) => {
-                console.error(err);
-                resolve(null);
-              },
-            });
-          });
-          return compressedFile;
-        } catch (err) {
-          console.error(err);
-          return null;
-        }
-      })
-    );
-
-    formattedFiles.forEach((file) => {
-      if (uploaded.findIndex((f) => f.name === file.name) === -1) {
-        const updatedSize = newSize + file.size;
-        if (updatedSize <= 500000) {
-          newSize = updatedSize;
-          uploaded.push(file);
-        } else {
-          alert("The total size of your attachments exceeds 500kb. Some files were not added.");
-        }
-      }
-    });
-
-    return new Promise((resolve) => {
-      setUploadedFiles(() => {
-        resolve(uploaded);
-        return uploaded;
-      });
-    });
-  }
-
   const handleFileEvent = async (e) => {
     const chosenFiles = Array.prototype.slice.call(e.target.files);
-    const updatedFiles = await handleUploadFiles(chosenFiles);
+    const { files: updatedFiles, rejected } = await processUploadedFiles(chosenFiles, uploadedFiles);
+    if (rejected.length > 0) {
+      alert("The total size of your attachments exceeds 500kb. Some files were not added.");
+    }
+    setUploadedFiles(updatedFiles);
 
     const dataTransfer = new DataTransfer();
     updatedFiles.forEach((blob) => {

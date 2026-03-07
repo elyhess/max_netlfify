@@ -11,8 +11,8 @@ vi.mock('../../services/EmailService', () => ({
   default: vi.fn(),
 }));
 
-vi.mock('compressorjs', () => ({
-  default: vi.fn(),
+vi.mock('../../services/imageCompressor', () => ({
+  processUploadedFiles: vi.fn(() => Promise.resolve({ files: [], rejected: [] })),
 }));
 
 describe('Contact', () => {
