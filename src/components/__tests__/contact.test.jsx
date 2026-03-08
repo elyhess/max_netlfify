@@ -46,8 +46,8 @@ describe('Contact', () => {
     expect(submitButton).not.toHaveClass('btn-disabled');
   });
 
-  it('shows confirmation after submit', () => {
-    const { getByPlaceholderText, getByText } = render(<Contact />);
+  it('shows confirmation after submit', async () => {
+    const { getByPlaceholderText, getByText, findByText } = render(<Contact />);
 
     fireEvent.change(getByPlaceholderText('Your Name'), { target: { value: 'John' } });
     fireEvent.change(getByPlaceholderText('Your Email'), { target: { value: 'john@test.com' } });
@@ -57,7 +57,7 @@ describe('Contact', () => {
 
     fireEvent.click(getByText('Send Message'));
 
-    expect(getByText('Message Sent!')).toBeInTheDocument();
+    expect(await findByText('Message Sent!')).toBeInTheDocument();
   });
 
   it('renders Upload Reference Images button', () => {

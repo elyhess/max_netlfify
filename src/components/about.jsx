@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import logo2 from "../img/logo2.webp";
 
 const faqData = [
@@ -38,7 +38,7 @@ export default function About() {
   const [openId, setOpenId] = useState(null);
 
   function toggleFaq(id) {
-    setOpenId(openId === id ? null : id);
+    setOpenId((currentOpenId) => (currentOpenId === id ? null : id));
   }
 
   return (
@@ -56,15 +56,21 @@ export default function About() {
               <div
                 key={item.id}
                 className={`faq-item glass-card ${openId === item.id ? "faq-open" : ""}`}
-                onClick={() => toggleFaq(item.id)}
               >
-                <div className="faq-question">
+                <button
+                  type="button"
+                  className="faq-question"
+                  onClick={() => toggleFaq(item.id)}
+                  aria-expanded={openId === item.id}
+                  aria-controls={`faq-answer-${item.id}`}
+                >
                   <span>{item.q}</span>
-                  <span className="faq-toggle">
+                  <span className="faq-toggle" aria-hidden="true">
                     {openId === item.id ? "−" : "+"}
                   </span>
-                </div>
+                </button>
                 <div
+                  id={`faq-answer-${item.id}`}
                   className={`faq-answer ${openId === item.id ? "faq-answer-open" : ""}`}
                 >
                   <p>{item.a}</p>
@@ -73,7 +79,7 @@ export default function About() {
             ))}
           </div>
           <div className="faq-artwork hidden-mobile">
-            <img src={logo2} alt="logo" className="faq-image" />
+            <img src={logo2} alt="logo" className="faq-image" loading="lazy" decoding="async" />
           </div>
         </div>
       </div>

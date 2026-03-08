@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function BackToTop() {
   const [visible, setVisible] = useState(false);
@@ -7,25 +7,25 @@ export default function BackToTop() {
     function handleScroll() {
       setVisible(window.pageYOffset > 100);
     }
-    window.addEventListener("scroll", handleScroll);
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  function scrollToTop(e) {
-    e.preventDefault();
+  function scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (
-    <a
-      href="/#"
-      className="back-to-top"
+    <button
+      type="button"
+      className={`back-to-top ${visible ? "is-visible" : ""}`}
       onClick={scrollToTop}
-      style={{
-        display: visible ? "flex" : "none",
-        opacity: visible ? 1 : 0,
-        transition: "opacity 0.3s",
-      }}
+      aria-label="Back to top"
+      aria-hidden={!visible}
+      tabIndex={visible ? 0 : -1}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -39,6 +39,6 @@ export default function BackToTop() {
           d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"
         />
       </svg>
-    </a>
+    </button>
   );
 }

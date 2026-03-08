@@ -41,6 +41,18 @@ describe('EmailService (production mode)', () => {
       'test_pk'
     );
   });
+
+  it('rejects when EmailJS env vars are missing', async () => {
+    vi.stubEnv('VITE_MOCK_EMAIL', 'false');
+    vi.unstubAllEnvs();
+    vi.stubEnv('VITE_MOCK_EMAIL', 'false');
+
+    const { default: sendEmail } = await import('../EmailService.js');
+
+    await expect(sendEmail(buildMockForm({ firstName: 'John' }))).rejects.toThrow(
+      'EmailJS environment variables are missing.'
+    );
+  });
 });
 
 describe('EmailService (mock mode)', () => {

@@ -1,7 +1,6 @@
-import React from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import 'bootstrap/dist/css/bootstrap.css';
 import './style.css';
 
 import Navbar from './components/navbar.jsx';
@@ -14,14 +13,15 @@ import Preloader from './components/preloader.jsx';
 import Stars from './components/Stars.jsx';
 import floatingLogo from './img/logo5.png';
 
+const floatingLogoClasses = ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5'];
+
 createRoot(document.getElementById('root')).render(
-  <React.Fragment>
+  <StrictMode>
     <Navbar />
-    <img src={floatingLogo} alt="" className="floating-logo fl-1" />
-    <img src={floatingLogo} alt="" className="floating-logo fl-2" />
-    <img src={floatingLogo} alt="" className="floating-logo fl-3" />
-    <img src={floatingLogo} alt="" className="floating-logo fl-4" />
-    <img src={floatingLogo} alt="" className="floating-logo fl-5" />
+    {floatingLogoClasses.map((className) => (
+      <img key={className} src={floatingLogo} alt="" className={`floating-logo ${className}`} />
+    ))}
+    <div className="max-cutout-layer" aria-hidden="true" />
     <div className="site-wrapper">
       <Stars />
       <Intro />
@@ -31,5 +31,5 @@ createRoot(document.getElementById('root')).render(
     </div>
     <BackToTop />
     <Preloader />
-  </React.Fragment>
+  </StrictMode>
 );

@@ -11,15 +11,18 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "check": "npm run test:run && npm run build",
+    "staging:deploy": "node ./scripts/netlify-staging.mjs deploy",
+    "staging:disable": "node ./scripts/netlify-staging.mjs disable",
+    "staging:enable": "node ./scripts/netlify-staging.mjs enable",
+    "staging:status": "node ./scripts/netlify-staging.mjs status"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
-    "bootstrap": "^5.3.3",
     "compressorjs": "^1.2.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-responsive": "^10.0.1",
     "sass": "^1.88.0"
   },
   "devDependencies": {

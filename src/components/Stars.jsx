@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const COLORS_1 = ["#FFF"];
 const COLORS_2 = [
@@ -13,6 +13,7 @@ const COLORS_3 = [
   "#faeb0b",
   "#FFF",
 ];
+const STARFIELD_HEIGHT = 2000;
 
 function generateShadow(count, width, height, colors) {
   const parts = [];
@@ -26,22 +27,23 @@ function generateShadow(count, width, height, colors) {
 }
 
 export default function Stars() {
-  const [width, setWidth] = useState(() => Math.max(window.innerWidth, 2000));
+  const [width, setWidth] = useState(() =>
+    typeof window === "undefined" ? STARFIELD_HEIGHT : Math.max(window.innerWidth, STARFIELD_HEIGHT)
+  );
 
   useEffect(() => {
     function handleResize() {
-      setWidth(Math.max(window.innerWidth, 2000));
+      setWidth(Math.max(window.innerWidth, STARFIELD_HEIGHT));
     }
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const shadows = useMemo(() => {
-    const h = 2000;
     return {
-      s1: generateShadow(600, width, h, COLORS_1),
-      s2: generateShadow(200, width, h, COLORS_2),
-      s3: generateShadow(100, width, h, COLORS_3),
+      s1: generateShadow(600, width, STARFIELD_HEIGHT, COLORS_1),
+      s2: generateShadow(200, width, STARFIELD_HEIGHT, COLORS_2),
+      s3: generateShadow(100, width, STARFIELD_HEIGHT, COLORS_3),
     };
   }, [width]);
 
@@ -68,7 +70,7 @@ export default function Stars() {
           <div
             style={{
               position: "relative",
-              top: 2000,
+              top: STARFIELD_HEIGHT,
               width: layer.size,
               height: layer.size,
               boxShadow: layer.shadow,

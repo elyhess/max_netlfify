@@ -153,7 +153,7 @@ describe('processUploadedFiles', () => {
     expect(files[0].name).toBe('old.jpg');
   });
 
-  it('only compresses files that have available slots', async () => {
+  it('compresses unique files before enforcing available slots', async () => {
     const Compressor = (await import('compressorjs')).default;
     const callsBefore = Compressor.mock.calls.length;
 
@@ -167,12 +167,41 @@ describe('processUploadedFiles', () => {
     ];
     const { files, rejected } = await processUploadedFiles(rawFiles, existing);
 
-    // Only 1 slot available, so only 1 file should be compressed
+    // All unique files are compressed first, then count limit is enforced.
     const callsAfter = Compressor.mock.calls.length;
-    expect(callsAfter - callsBefore).toBe(1);
+    expect(callsAfter - callsBefore).toBe(3);
 
     expect(files).toHaveLength(6);
     expect(rejected).toHaveLength(2);
+  });
+
+  it('accepts a new file when an earlier selected file is a duplicate near the limit', async () => {
+    const existing = Array.from({ length: 5 }, (_, i) =>
+      createMockFile(`existing${i}.jpg`, 1000)
+    );
+    const rawFiles = [
+      createMockFile('existing0.jpg', 10000),
+      createMockFile('new-fit.jpg', 10000),
+    ];
+
+    const { files, rejected } = await processUploadedFiles(rawFiles, existing);
+
+    expect(files).toHaveLength(6);
+    expect(files.some((file) => file.name === 'new-fit.jpg')).toBe(true);
+    expect(rejected).toHaveLength(0);
+  });
+
+  it('deduplicates files picked twice in the same selection', async () => {
+    const rawFiles = [
+      createMockFile('repeat.jpg', 10000),
+      createMockFile('repeat.jpg', 12000),
+    ];
+
+    const { files, rejected } = await processUploadedFiles(rawFiles, []);
+
+    expect(files).toHaveLength(1);
+    expect(files[0].name).toBe('repeat.jpg');
+    expect(rejected).toHaveLength(0);
   });
 
   it('rejects all files when already at max count', async () => {

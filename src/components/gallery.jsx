@@ -1,5 +1,3 @@
-import React from "react";
-
 import img1 from "../img/gallery/537559271_18534893635013456_8827823801066106167_n.jpg";
 import img2 from "../img/gallery/538954266_18535626007013456_7142549030697035430_n.jpg";
 import img3 from "../img/gallery/539798801_1312522097147426_5573402057859173759_n.jpg";
@@ -33,6 +31,8 @@ export default function Gallery() {
                 src={item.src}
                 alt={item.alt}
                 className="gallery-image"
+                loading="lazy"
+                decoding="async"
               />
             </div>
           ))}

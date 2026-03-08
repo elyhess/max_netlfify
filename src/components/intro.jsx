@@ -1,4 +1,3 @@
-import React from "react";
 import logo from "../img/logo5.png";
 
 export default function Intro() {
@@ -6,7 +5,7 @@ export default function Intro() {
     <section id="home" className="hero-section">
       <div className="hero-content">
         <div className="hero-logo-wrapper">
-          <img src={logo} alt="logo" className="hero-logo" />
+          <img src={logo} alt="logo" className="hero-logo" fetchPriority="high" />
         </div>
         <h1 className="hero-title">MAX VK TATTOOS</h1>
         <p className="hero-subtitle">

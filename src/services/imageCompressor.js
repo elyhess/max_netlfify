@@ -44,17 +44,23 @@ export function addFilesWithinLimit(newFiles, existingFiles) {
 }
 
 export async function processUploadedFiles(rawFiles, existingFiles) {
-  const slotsAvailable = MAX_FILE_COUNT - existingFiles.length;
+  const existingNames = new Set(existingFiles.map((file) => file.name));
+  const uniqueFiles = [];
 
-  // Only compress files we might have room for
-  const filesToProcess = rawFiles.slice(0, Math.max(0, slotsAvailable));
-  const skipped = rawFiles.slice(slotsAvailable);
+  for (const file of rawFiles) {
+    if (existingNames.has(file.name)) {
+      continue;
+    }
 
-  const compressed = (await Promise.all(filesToProcess.map(compressFile))).filter(Boolean);
+    existingNames.add(file.name);
+    uniqueFiles.push(file);
+  }
+
+  const compressed = (await Promise.all(uniqueFiles.map(compressFile))).filter(Boolean);
   const { accepted, rejected } = addFilesWithinLimit(compressed, existingFiles);
 
   return {
     files: [...existingFiles, ...accepted],
-    rejected: [...rejected, ...skipped],
+    rejected,
   };
 }

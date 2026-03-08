@@ -1,7 +1,23 @@
 import emailjs from '@emailjs/browser';
 
-const MOCK_ENABLED = import.meta.env.VITE_MOCK_EMAIL === 'true';
+const STAGING_HOST_RE = /(staging--|\.?staging\.|staging-)/i;
 const STORAGE_KEY = 'mock_email_submissions';
+
+function isStagingHost(hostname) {
+   return STAGING_HOST_RE.test(hostname);
+}
+
+function isMockEnabled() {
+   if (import.meta.env.VITE_MOCK_EMAIL === 'true') {
+      return true;
+   }
+
+   if (typeof window === 'undefined') {
+      return false;
+   }
+
+   return isStagingHost(window.location.hostname);
+}
 
 function getFormData(formEl) {
    const data = {};
@@ -17,7 +33,7 @@ function getFormData(formEl) {
 }
 
 function mockSendEmail(form) {
-   const formData = getFormData(form.current);
+   const formData = getFormData(form);
    const entry = {
       timestamp: new Date().toISOString(),
       data: formData
@@ -33,19 +49,24 @@ function mockSendEmail(form) {
    return Promise.resolve({ status: 200, text: 'OK (mock)' });
 }
 
-export default function sendEmail(form) {
-   if (MOCK_ENABLED) {
+export default function sendEmail(formOrRef) {
+   const form = formOrRef?.current ?? formOrRef;
+
+   if (!form) {
+      return Promise.reject(new Error('A form element is required to send email.'));
+   }
+
+   if (isMockEnabled()) {
       return mockSendEmail(form);
    }
 
-   emailjs.sendForm(
-      import.meta.env.VITE_EJS_SERVICE,
-      import.meta.env.VITE_EJS_TEMPLATE,
-      form.current,
-      import.meta.env.VITE_EJS_PK
-   ).then(function (response) {
-      console.log('SUCCESS!', response.status, response.text);
-   }, function (err) {
-      console.log('FAILED...', err);
-   });
+   const serviceId = import.meta.env.VITE_EJS_SERVICE;
+   const templateId = import.meta.env.VITE_EJS_TEMPLATE;
+   const publicKey = import.meta.env.VITE_EJS_PK;
+
+   if (!serviceId || !templateId || !publicKey) {
+      return Promise.reject(new Error('EmailJS environment variables are missing.'));
+   }
+
+   return emailjs.sendForm(serviceId, templateId, form, publicKey);
 }

@@ -1,28 +1,38 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import sendEmail from "../services/EmailService";
 import { processUploadedFiles } from "../services/imageCompressor";
 
+const INITIAL_FORM_VALUES = {
+  firstName: "",
+  email: "",
+  phone: "",
+  description: "",
+  location: "",
+};
+
 export default function Contact() {
-  const [name, setName] = useState();
-  const [email, setEmail] = useState();
-  const [phone, setPhone] = useState();
-  const [description, setDescription] = useState();
-  const [submitted, setSubmitted] = useState(false);
-  const [location, setLocation] = useState();
+  const [formValues, setFormValues] = useState(INITIAL_FORM_VALUES);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  const [submitStatus, setSubmitStatus] = useState("idle");
+  const [submitError, setSubmitError] = useState("");
   const [attachmentCount, setAttachmentCount] = useState(0);
-  const formFilled = name && email && phone && description && location;
-  const form = useRef();
+  const [attachmentError, setAttachmentError] = useState("");
+  const formFilled = Object.values(formValues).every((value) => value.trim());
+  const form = useRef(null);
   const inputElement = useRef(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const submitted = submitStatus === "success";
 
   const handleFileEvent = async (e) => {
-    const chosenFiles = Array.prototype.slice.call(e.target.files);
+    const chosenFiles = Array.from(e.target.files ?? []);
     const { files: updatedFiles, rejected } = await processUploadedFiles(
       chosenFiles,
       uploadedFiles
     );
     if (rejected.length > 0) {
-      alert("Some files were not added. Maximum 6 files allowed.");
+      setAttachmentError("Some files were skipped. You can attach up to 6 images.");
+    } else {
+      setAttachmentError("");
     }
     setUploadedFiles(updatedFiles);
 
@@ -35,20 +45,39 @@ export default function Contact() {
     setAttachmentCount(dataTransfer.files.length);
   };
 
+  function handleFieldChange(event) {
+    const { name, value } = event.target;
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [name]: value,
+    }));
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
-    setSubmitted(true);
+
+    if (!formFilled || submitStatus === "submitting") {
+      return;
+    }
+
+    setSubmitStatus("submitting");
+    setSubmitError("");
+
     try {
-      sendEmail(form);
-    } catch (e) {
-      console.error(e);
-      alert("Your message could not be sent. Sorry about that.");
+      await sendEmail(form.current);
+      setSubmittedEmail(formValues.email);
+      setSubmitStatus("success");
+    } catch (error) {
+      console.error(error);
+      setSubmitStatus("idle");
+      setSubmitError("Your message could not be sent. Please try again in a bit.");
     }
   }
 
   function getFileName(str) {
     if (str.length > 12) {
-      return str.substr(0, 6) + "..." + str.substr(-6);
+      return `${str.slice(0, 6)}...${str.slice(-6)}`;
     }
     return str;
   }
@@ -58,6 +87,7 @@ export default function Contact() {
       (file) => file.name !== fileName
     );
     setUploadedFiles(updatedUploadedFiles);
+    setAttachmentError("");
 
     if (inputElement.current) {
       const dataTransfer = new DataTransfer();
@@ -82,10 +112,10 @@ export default function Contact() {
         <div className="contact-layout">
           <div className="contact-form-wrapper glass-card">
             {submitted ? (
-              <div className="contact-success">
+              <div className="contact-success" role="status" aria-live="polite">
                 <div className="success-icon">&#10003;</div>
                 <h3>Message Sent!</h3>
-                <p>A confirmation email has been sent to {email}</p>
+                <p>A confirmation email has been sent to {submittedEmail}</p>
                 <p>Please check your spam folder!</p>
               </div>
             ) : (
@@ -95,55 +125,73 @@ export default function Contact() {
                 id="contactForm"
                 className="contactForm"
               >
+                {submitError && (
+                  <p className="form-feedback form-feedback-error" role="alert">
+                    {submitError}
+                  </p>
+                )}
                 <div className="form-grid">
                   <div className="form-field">
                     <input
                       type="text"
                       name="firstName"
-                      onChange={(e) => setName(e.target.value)}
+                      value={formValues.firstName}
+                      onChange={handleFieldChange}
                       className="input-dark"
                       id="name"
                       placeholder="Your Name"
+                      autoComplete="name"
+                      required
                     />
                   </div>
                   <div className="form-field">
                     <input
                       type="email"
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={formValues.email}
+                      onChange={handleFieldChange}
                       className="input-dark"
                       name="email"
                       id="email"
                       placeholder="Your Email"
+                      autoComplete="email"
+                      required
                     />
                   </div>
                   <div className="form-field full-width">
                     <input
-                      type="text"
-                      onChange={(e) => setPhone(e.target.value)}
+                      type="tel"
+                      value={formValues.phone}
+                      onChange={handleFieldChange}
                       className="input-dark"
                       name="phone"
                       id="phone"
                       placeholder="Phone Number"
+                      autoComplete="tel"
+                      required
                     />
                   </div>
                   <div className="form-field full-width">
                     <textarea
                       className="input-dark"
-                      onChange={(e) => setDescription(e.target.value)}
+                      value={formValues.description}
+                      onChange={handleFieldChange}
                       name="description"
                       rows="4"
                       id="description"
                       placeholder="Description &mdash; Be as detailed as possible. Include links to reference images."
+                      required
                     />
                   </div>
                   <div className="form-field full-width">
                     <textarea
                       className="input-dark"
                       name="location"
-                      onChange={(e) => setLocation(e.target.value)}
+                      value={formValues.location}
+                      onChange={handleFieldChange}
                       rows="2"
                       id="location"
                       placeholder="Placement & size"
+                      required
                     />
                   </div>
 
@@ -158,13 +206,12 @@ export default function Contact() {
 
                   <div className="form-field full-width">
                     <input
-                      role="button"
                       hidden
                       id="attachments"
                       type="file"
                       multiple
                       name="attachments"
-                      accept=".heic, .jpeg, .jpg, .png, .webp"
+                      accept="image/heic,image/heif,image/jpeg,image/png,image/webp"
                       onChange={handleFileEvent}
                       ref={inputElement}
                     />
@@ -183,6 +230,11 @@ export default function Contact() {
                       </svg>
                       Upload Reference Images
                     </label>
+                    {attachmentError && (
+                      <p className="form-feedback" role="status">
+                        {attachmentError}
+                      </p>
+                    )}
                     {uploadedFiles.length > 0 && (
                       <div className="uploaded-files">
                         {uploadedFiles.map((file) => (
@@ -209,9 +261,9 @@ export default function Contact() {
                     <button
                       type="submit"
                       className={`btn-neon btn-neon-primary btn-submit ${!formFilled ? "btn-disabled" : ""}`}
-                      disabled={!formFilled}
+                      disabled={!formFilled || submitStatus === "submitting"}
                     >
-                      Send Message
+                      {submitStatus === "submitting" ? "Sending..." : "Send Message"}
                     </button>
                   </div>
                 </div>

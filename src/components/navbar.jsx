@@ -1,4 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const NAV_LINKS = [
+  { href: "#home", label: "Home" },
+  { href: "#gallery", label: "Gallery" },
+  { href: "#faq", label: "FAQ" },
+  { href: "#contact", label: "Contact" },
+];
 
 export default function Navbar() {
   const navRef = useRef(null);
@@ -9,35 +16,44 @@ export default function Navbar() {
     function handleScroll() {
       setScrolled(window.pageYOffset > 50);
     }
-    window.addEventListener("scroll", handleScroll);
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
-    function handleSmoothScroll(e) {
-      const href = e.currentTarget.getAttribute("href");
-      if (!href || !href.startsWith("#") || href === "#") return;
-      const target = document.querySelector(href);
-      if (target) {
-        e.preventDefault();
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
         setMenuOpen(false);
-        const navHeight = navRef.current ? navRef.current.offsetHeight : 0;
-        const top =
-          target.getBoundingClientRect().top + window.pageYOffset - navHeight;
-        window.scrollTo({ top, behavior: "smooth" });
       }
     }
 
-    const links = document.querySelectorAll(
-      'a.js-scroll[href*="#"]:not([href="#"])'
-    );
-    links.forEach((link) => link.addEventListener("click", handleSmoothScroll));
-    return () => {
-      links.forEach((link) =>
-        link.removeEventListener("click", handleSmoothScroll)
-      );
-    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  function handleNavClick(event, href) {
+    if (!href.startsWith("#") || href === "#") {
+      return;
+    }
+
+    const target = document.querySelector(href);
+
+    if (!target) {
+      return;
+    }
+
+    event.preventDefault();
+    setMenuOpen(false);
+
+    const navHeight = navRef.current?.offsetHeight ?? 0;
+    const top = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
+
+    window.scrollTo({ top, behavior: "smooth" });
+  }
 
   return (
     <nav
@@ -53,16 +69,28 @@ export default function Navbar() {
           className={`navbar-hamburger ${menuOpen ? "active" : ""}`}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle navigation"
+          aria-controls="primary-navigation"
+          aria-expanded={menuOpen}
+          type="button"
         >
           <span className="hamburger-line" />
           <span className="hamburger-line" />
           <span className="hamburger-line" />
         </button>
-        <div className={`navbar-links ${menuOpen ? "show" : ""}`}>
-          <a className="nav-link js-scroll" href="#home">Home</a>
-          <a className="nav-link js-scroll" href="#gallery">Gallery</a>
-          <a className="nav-link js-scroll" href="#faq">FAQ</a>
-          <a className="nav-link js-scroll" href="#contact">Contact</a>
+        <div
+          id="primary-navigation"
+          className={`navbar-links ${menuOpen ? "show" : ""}`}
+        >
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.href}
+              className="nav-link js-scroll"
+              href={link.href}
+              onClick={(event) => handleNavClick(event, link.href)}
+            >
+              {link.label}
+            </a>
+          ))}
         </div>
       </div>
     </nav>
