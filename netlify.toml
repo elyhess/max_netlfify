@@ -1,6 +1,19 @@
 [build]
-  publish = "dist"
   command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
 
-[context.deploy-preview.environment]
-  VITE_MOCK_EMAIL = "true"
+[dev]
+  framework = "#auto"
+
+# Proxy /api/inquiry to the serverless function
+[[redirects]]
+  from = "/api/inquiry"
+  to = "/.netlify/functions/inquiry"
+  status = 200
+
+# SPA fallback (must be last)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

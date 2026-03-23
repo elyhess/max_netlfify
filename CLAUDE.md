@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Tattoo inquiry/booking website for MAX VK TATTOOS. Single-page React app (React 19) built with Vite, deployed to Netlify. Uses EmailJS to send form submissions including compressed image attachments.
+Tattoo inquiry/booking website for MAX VK TATTOOS. Single-page React app (React 19) built with Vite, deployed to Netlify. Uses a Netlify Function + Gmail API (OAuth2) to send form submissions including compressed image attachments.
 
 ## Commands
 
 - `nvm use` — use project Node version (22 LTS, defined in `.nvmrc`)
-- `npm run dev` — dev server at localhost:5173
+- `npm run dev` — Vite dev server at localhost:5173 (frontend only, no serverless functions)
+- `netlify dev` — full local dev (Vite + serverless functions at localhost:8888, loads `.env.local`)
 - `npm run build` — production build (outputs to `dist/`)
 - `npm run preview` — preview production build locally
 - `npm test` — run tests in watch mode (Vitest)
@@ -18,77 +19,22 @@ Tattoo inquiry/booking website for MAX VK TATTOOS. Single-page React app (React 
 
 ## Environment Variables
 
-Requires `.env` at project root with EmailJS credentials (uses `VITE_` prefix):
-```
-VITE_EJS_SERVICE=
-VITE_EJS_TEMPLATE=
-VITE_EJS_PK=
-```
+Gmail OAuth2 credentials are set as Netlify environment variables (not in the client bundle):
 
-## Email Mock Mode
+| Variable | Description |
+|---|---|
+| `GMAIL_CLIENT_ID` | OAuth2 client ID from Google Cloud Console |
+| `GMAIL_CLIENT_SECRET` | OAuth2 client secret |
+| `GMAIL_REFRESH_TOKEN` | Long-lived refresh token from OAuth Playground |
+| `ARTIST_EMAIL` | Gmail address to send from/to (required) |
 
-In development (`npm run dev`), email submissions are mocked by default via `VITE_MOCK_EMAIL=true` in `.env.development`. No real EmailJS calls are made.
+For local development with `netlify dev`, add these to `.env.local` at the project root (never committed). See `.env.example` for the template.
 
-Mock submissions are saved to `localStorage` and logged to the browser console with a `[MOCK EMAIL]` prefix. To inspect past submissions in DevTools:
-```js
-JSON.parse(localStorage.getItem("mock_email_submissions"))
-```
+## Local Development
 
-Production builds (`npm run build`) use `.env.production` with `VITE_MOCK_EMAIL=false`, which sends real emails via EmailJS.
+Use `netlify dev` to test the full flow locally (frontend + serverless function). It proxies function calls and loads env vars from `.env.local`.
 
-## Netlify Staging Deploy
-
-Use a separate Netlify site for staging so production is never touched.
-
-- **Production site:** `maxvktattoos` (`https://maxvktattoos.com`)
-- **Staging site:** `maxvktattoos-staging` (`https://maxvktattoos-staging.netlify.app`)
-- **Staging site ID:** `e5fd3895-00e9-47a2-b766-bec99cda4b42`
-- **Staging alias URL:** `https://staging--maxvktattoos-staging.netlify.app`
-
-### Deploy staging
-
-Preferred shortcuts (after `nvm use`):
-
-```bash
-npm run staging:deploy
-npm run staging:status
-npm run staging:disable
-npm run staging:enable
-```
-
-These scripts are defined in `package.json` and always target the staging site ID (`e5fd3895-00e9-47a2-b766-bec99cda4b42`).
-They now route through `scripts/netlify-staging.mjs`, so the staging site ID only lives in one place and can be overridden with `NETLIFY_STAGING_SITE_ID` if needed.
-
-Manual equivalent:
-
-```bash
-export NVM_DIR="$HOME/.nvm"
-. "$NVM_DIR/nvm.sh"
-nvm use
-npx netlify deploy \
-  --site e5fd3895-00e9-47a2-b766-bec99cda4b42 \
-  --build \
-  --alias staging \
-  --context deploy-preview \
-  --message "staging deploy"
-```
-
-Use `netlify deploy` (no `--prod`) so this stays non-production.
-The repo may still be linked locally to the production site in `.netlify/state.json`; the staging helper script always passes `--site` explicitly so staging commands cannot accidentally deploy to production.
-
-### Email behavior in staging
-
-Staging must never call EmailJS. `src/services/EmailService.js` enforces mock mode when hostname matches staging patterns (for example `staging--maxvktattoos-staging.netlify.app`), even if env vars are misconfigured.
-`netlify.toml` also sets `VITE_MOCK_EMAIL=true` for `deploy-preview` context, which matches the staging deploy command and prevents real EmailJS calls during the build itself.
-
-### Disable staging
-
-Yes, staging can be disabled.
-
-1. **Temporary disable (recommended):** stop creating new staging deploys and stop sharing the staging alias URL.
-2. **Hard disable (CLI):** run `npm run staging:disable`.
-3. **Hard disable (UI):** deactivate the `maxvktattoos-staging` site in Netlify UI (`Site configuration` -> `General` -> `Danger zone`) so the URL no longer serves the app.
-4. **Re-enable later:** run `npm run staging:enable` and then `npm run staging:deploy`.
+Use `npm run dev` for frontend-only development (form submissions will fail without the function backend).
 
 ## Architecture
 
@@ -100,15 +46,19 @@ Single-page app with no routing. All components render in `src/main.jsx` via `cr
 - **Intro** (`components/intro.jsx`) — full-viewport hero with floating logo animation, gradient title, "Book Now" and "View Work" CTAs
 - **Gallery** (`components/gallery.jsx`) — responsive CSS grid (3 cols desktop, 2 cols mobile) for tattoo work showcase with hover overlays. Currently uses gradient placeholders — replace with real images. Includes Instagram CTA link
 - **About** (`components/about.jsx`) — FAQ accordion with accessible button-based toggles and artwork sidebar on desktop (hidden on mobile via CSS)
-- **Contact** (`components/contact.jsx`) — booking form with controlled inputs, image upload/compression (via compressorjs, max 6 files), inline error states, and EmailJS integration
+- **Contact** (`components/contact.jsx`) — booking form with controlled inputs, client-side WebP image compression (canvas-based, max 6 files), inline error states, and Gmail API integration via Netlify Function
 - **BackToTop** (`components/back-top.jsx`) — gradient scroll-to-top button
 - **Preloader** (`components/preloader.jsx`) — dark background loading spinner
 - **Stars** (`components/Stars.jsx`) — animated starfield background generated in React with colored stars (#faeb0b yellow, #f41dcf pink, #1990fe blue)
 
 ### Services
 
-- **EmailService** (`services/EmailService.js`) — wrapper around `@emailjs/browser` with mock mode support
-- **imageCompressor** (`services/imageCompressor.js`) — compresses uploaded images (quality 0.2, maxWidth 600), deduplicates by filename, and enforces 6-file limit
+- **EmailService** (`services/EmailService.js`) — sends inquiry JSON to `/api/inquiry` via fetch
+- **imageCompressor** (`services/imageCompressor.js`) — canvas-based WebP image compression (iterative quality/scale reduction), deduplicates by filename, and enforces 6-file limit. Images are compressed at submit time and sent as base64 data URLs.
+
+### Netlify Function
+
+- **inquiry** (`netlify/functions/inquiry.ts`) — receives form JSON, builds MIME email with attachments using nodemailer's MailComposer, sends via Gmail API with OAuth2. Email is sent from/to the artist's Gmail with `replyTo` set to the client's email.
 
 ## Design System
 
@@ -164,6 +114,7 @@ Ordered by: Custom Properties → Base → Site Wrapper → Glass Card → Secti
 - `src/style.css` — all custom styles with CSS custom properties
 - `src/components/Stars.jsx` — starfield animation layer
 - `index.html` — Google Fonts link for Space Grotesk
-- `scripts/netlify-staging.mjs` — single source of truth for staging Netlify commands
+- `netlify/functions/inquiry.ts` — Gmail API serverless function
+- `scripts/gmail-oauth-setup.mjs` — one-time OAuth token retrieval
 - CSS load order in `main.jsx`: `style.css`
 - Static assets (logos) in `src/img/`

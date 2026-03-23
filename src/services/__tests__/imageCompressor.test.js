@@ -1,21 +1,9 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
-  compressFile,
   addFilesWithinLimit,
   processUploadedFiles,
-  COMPRESSION_OPTIONS,
   MAX_FILE_COUNT,
 } from '../imageCompressor';
-
-// Mock Compressor to simulate compression behavior
-vi.mock('compressorjs', () => ({
-  default: vi.fn((file, options) => {
-    const compressedSize = Math.floor(file.size * COMPRESSION_OPTIONS.quality);
-    const compressed = new File(['x'.repeat(compressedSize)], file.name, { type: file.type });
-    Object.defineProperty(compressed, 'size', { value: compressedSize });
-    setTimeout(() => options.success(compressed), 0);
-  }),
-}));
 
 function createMockFile(name, sizeInBytes, type = 'image/jpeg') {
   const file = new File(['x'], name, { type });
@@ -24,46 +12,8 @@ function createMockFile(name, sizeInBytes, type = 'image/jpeg') {
 }
 
 describe('constants', () => {
-  it('quality is 0.2', () => {
-    expect(COMPRESSION_OPTIONS.quality).toBe(0.2);
-  });
-
-  it('maxWidth is 600', () => {
-    expect(COMPRESSION_OPTIONS.maxWidth).toBe(600);
-  });
-
   it('max file count is 6', () => {
     expect(MAX_FILE_COUNT).toBe(6);
-  });
-});
-
-describe('compressFile', () => {
-  it('returns a compressed file', async () => {
-    const input = createMockFile('photo.jpg', 1000000);
-    const result = await compressFile(input);
-    expect(result).not.toBeNull();
-    expect(result.name).toBe('photo.jpg');
-  });
-
-  it('passes compression options to Compressor', async () => {
-    const Compressor = (await import('compressorjs')).default;
-    const input = createMockFile('photo.jpg', 500000);
-    await compressFile(input);
-
-    const callArgs = Compressor.mock.calls[Compressor.mock.calls.length - 1];
-    expect(callArgs[1].quality).toBe(0.2);
-    expect(callArgs[1].maxWidth).toBe(600);
-  });
-
-  it('returns null when compression fails', async () => {
-    const Compressor = (await import('compressorjs')).default;
-    Compressor.mockImplementationOnce((file, options) => {
-      setTimeout(() => options.error(new Error('compression failed')), 0);
-    });
-
-    const input = createMockFile('bad.jpg', 1000000);
-    const result = await compressFile(input);
-    expect(result).toBeNull();
   });
 });
 
@@ -72,17 +22,6 @@ describe('addFilesWithinLimit', () => {
     const newFiles = [
       createMockFile('a.jpg', 100000),
       createMockFile('b.jpg', 200000),
-    ];
-    const { accepted, rejected } = addFilesWithinLimit(newFiles, []);
-
-    expect(accepted).toHaveLength(2);
-    expect(rejected).toHaveLength(0);
-  });
-
-  it('accepts large files as long as count is under limit', () => {
-    const newFiles = [
-      createMockFile('a.jpg', 300000),
-      createMockFile('b.jpg', 300000),
     ];
     const { accepted, rejected } = addFilesWithinLimit(newFiles, []);
 
@@ -133,7 +72,7 @@ describe('addFilesWithinLimit', () => {
 });
 
 describe('processUploadedFiles', () => {
-  it('compresses and adds files', async () => {
+  it('adds files and returns them', async () => {
     const rawFiles = [
       createMockFile('photo1.jpg', 100000),
       createMockFile('photo2.jpg', 100000),
@@ -153,10 +92,7 @@ describe('processUploadedFiles', () => {
     expect(files[0].name).toBe('old.jpg');
   });
 
-  it('compresses unique files before enforcing available slots', async () => {
-    const Compressor = (await import('compressorjs')).default;
-    const callsBefore = Compressor.mock.calls.length;
-
+  it('enforces count limit after deduplication', async () => {
     const existing = Array.from({ length: 5 }, (_, i) =>
       createMockFile(`existing${i}.jpg`, 1000)
     );
@@ -166,10 +102,6 @@ describe('processUploadedFiles', () => {
       createMockFile('no-slot2.jpg', 10000),
     ];
     const { files, rejected } = await processUploadedFiles(rawFiles, existing);
-
-    // All unique files are compressed first, then count limit is enforced.
-    const callsAfter = Compressor.mock.calls.length;
-    expect(callsAfter - callsBefore).toBe(3);
 
     expect(files).toHaveLength(6);
     expect(rejected).toHaveLength(2);
@@ -213,16 +145,6 @@ describe('processUploadedFiles', () => {
 
     expect(files).toHaveLength(6);
     expect(rejected).toHaveLength(1);
-  });
-
-  it('accepts large files after compression', async () => {
-    const existing = [createMockFile('first.jpg', 490000)];
-    // 500000 * 0.2 = 100000 compressed — should be accepted since no size limit
-    const rawFiles = [createMockFile('huge.jpg', 500000)];
-    const { files, rejected } = await processUploadedFiles(rawFiles, existing);
-
-    expect(files).toHaveLength(2);
-    expect(rejected).toHaveLength(0);
   });
 
   it('file count never exceeds 6', async () => {

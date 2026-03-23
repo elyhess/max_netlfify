@@ -4,11 +4,12 @@ import { vi } from 'vitest';
 import Contact from '../contact';
 
 vi.mock('../../services/EmailService', () => ({
-  default: vi.fn(),
+  default: vi.fn(() => Promise.resolve({ success: true })),
 }));
 
 vi.mock('../../services/imageCompressor', () => ({
   processUploadedFiles: vi.fn(() => Promise.resolve({ files: [], rejected: [] })),
+  prepareAttachments: vi.fn(() => Promise.resolve({ references: [], totalBytes: 0 })),
 }));
 
 describe('Contact', () => {

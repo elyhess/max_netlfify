@@ -3,7 +3,5 @@
 /node_modules
 /build
 /dist
-.env
-.env.development
-.env.production
+.env.local
 .DS_Store

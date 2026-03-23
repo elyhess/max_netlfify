@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import sendEmail from "../services/EmailService";
-import { processUploadedFiles } from "../services/imageCompressor";
+import sendInquiry from "../services/EmailService";
+import { processUploadedFiles, prepareAttachments } from "../services/imageCompressor";
 
 const INITIAL_FORM_VALUES = {
   firstName: "",
@@ -15,10 +15,8 @@ export default function Contact() {
   const [submittedEmail, setSubmittedEmail] = useState("");
   const [submitStatus, setSubmitStatus] = useState("idle");
   const [submitError, setSubmitError] = useState("");
-  const [attachmentCount, setAttachmentCount] = useState(0);
   const [attachmentError, setAttachmentError] = useState("");
   const formFilled = Object.values(formValues).every((value) => value.trim());
-  const form = useRef(null);
   const inputElement = useRef(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const submitted = submitStatus === "success";
@@ -35,14 +33,6 @@ export default function Contact() {
       setAttachmentError("");
     }
     setUploadedFiles(updatedFiles);
-
-    const dataTransfer = new DataTransfer();
-    updatedFiles.forEach((blob) => {
-      const file = new File([blob], blob.name, { type: blob.type });
-      dataTransfer.items.add(file);
-    });
-    e.target.files = dataTransfer.files;
-    setAttachmentCount(dataTransfer.files.length);
   };
 
   function handleFieldChange(event) {
@@ -65,7 +55,16 @@ export default function Contact() {
     setSubmitError("");
 
     try {
-      await sendEmail(form.current);
+      const { references } = await prepareAttachments(uploadedFiles);
+
+      await sendInquiry({
+        ...formValues,
+        references: references.map((ref) => ({
+          dataUrl: ref.dataUrl,
+          name: ref.name,
+        })),
+      });
+
       setSubmittedEmail(formValues.email);
       setSubmitStatus("success");
     } catch (error) {
@@ -91,12 +90,10 @@ export default function Contact() {
 
     if (inputElement.current) {
       const dataTransfer = new DataTransfer();
-      updatedUploadedFiles.forEach((blob) => {
-        const file = new File([blob], blob.name, { type: blob.type });
+      updatedUploadedFiles.forEach((file) => {
         dataTransfer.items.add(file);
       });
       inputElement.current.files = dataTransfer.files;
-      setAttachmentCount(dataTransfer.files.length);
     }
   };
 
@@ -121,7 +118,6 @@ export default function Contact() {
             ) : (
               <form
                 onSubmit={handleSubmit}
-                ref={form}
                 id="contactForm"
                 className="contactForm"
               >
@@ -194,15 +190,6 @@ export default function Contact() {
                       required
                     />
                   </div>
-
-                  <input
-                    name="attachmentCount"
-                    id="attachmentCount"
-                    value={attachmentCount}
-                    type="number"
-                    readOnly
-                    hidden
-                  />
 
                   <div className="form-field full-width">
                     <input

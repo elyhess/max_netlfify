@@ -1,101 +1,71 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-vi.mock('@emailjs/browser', () => ({
-  default: {
-    sendForm: vi.fn(() => Promise.resolve({ status: 200, text: 'OK' })),
-  },
-}));
-
-function buildMockForm(fields) {
-  const form = document.createElement('form');
-  Object.entries(fields).forEach(([name, value]) => {
-    const input = document.createElement('input');
-    input.name = name;
-    input.value = value;
-    form.appendChild(input);
-  });
-  return { current: form };
-}
-
 beforeEach(() => {
   vi.clearAllMocks();
   vi.resetModules();
-  localStorage.clear();
+  globalThis.fetch = vi.fn();
 });
 
-describe('EmailService (production mode)', () => {
-  it('calls emailjs.sendForm with correct parameters', async () => {
-    vi.stubEnv('VITE_MOCK_EMAIL', 'false');
-    vi.stubEnv('VITE_EJS_SERVICE', 'test_service');
-    vi.stubEnv('VITE_EJS_TEMPLATE', 'test_template');
-    vi.stubEnv('VITE_EJS_PK', 'test_pk');
+describe('sendInquiry', () => {
+  it('POSTs JSON to /api/inquiry', async () => {
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    });
 
-    const { default: sendEmail } = await import('../EmailService.js');
-    const emailjs = (await import('@emailjs/browser')).default;
-    const mockForm = buildMockForm({ firstName: 'John', email: 'john@test.com' });
-    sendEmail(mockForm);
-    expect(emailjs.sendForm).toHaveBeenCalledWith(
-      'test_service',
-      'test_template',
-      mockForm.current,
-      'test_pk'
-    );
+    const { default: sendInquiry } = await import('../EmailService.js');
+    const payload = {
+      firstName: 'John',
+      email: 'john@test.com',
+      phone: '555-1234',
+      description: 'A tattoo idea',
+      location: 'Arm',
+      references: [],
+    };
+
+    await sendInquiry(payload);
+
+    expect(globalThis.fetch).toHaveBeenCalledWith('/api/inquiry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
   });
 
-  it('rejects when EmailJS env vars are missing', async () => {
-    vi.stubEnv('VITE_MOCK_EMAIL', 'false');
-    vi.unstubAllEnvs();
-    vi.stubEnv('VITE_MOCK_EMAIL', 'false');
+  it('returns parsed JSON on success', async () => {
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    });
 
-    const { default: sendEmail } = await import('../EmailService.js');
-
-    await expect(sendEmail(buildMockForm({ firstName: 'John' }))).rejects.toThrow(
-      'EmailJS environment variables are missing.'
-    );
-  });
-});
-
-describe('EmailService (mock mode)', () => {
-  beforeEach(() => {
-    vi.stubEnv('VITE_MOCK_EMAIL', 'true');
+    const { default: sendInquiry } = await import('../EmailService.js');
+    const result = await sendInquiry({ firstName: 'John', email: '', phone: '', description: '', location: '', references: [] });
+    expect(result.success).toBe(true);
   });
 
-  it('does not call emailjs.sendForm', async () => {
-    const { default: sendEmail } = await import('../EmailService.js');
-    const emailjs = (await import('@emailjs/browser')).default;
-    const mockForm = buildMockForm({ firstName: 'John', email: 'john@test.com' });
-    sendEmail(mockForm);
-    expect(emailjs.sendForm).not.toHaveBeenCalled();
+  it('throws when the server returns an error', async () => {
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: false,
+      json: () => Promise.resolve({ error: 'Email delivery is not configured.' }),
+    });
+
+    const { default: sendInquiry } = await import('../EmailService.js');
+
+    await expect(
+      sendInquiry({ firstName: 'John', email: 'john@test.com', phone: '', description: '', location: '', references: [] })
+    ).rejects.toThrow('Email delivery is not configured.');
   });
 
-  it('saves submission to localStorage', async () => {
-    const { default: sendEmail } = await import('../EmailService.js');
-    const mockForm = buildMockForm({ firstName: 'John', email: 'john@test.com', phone: '555-1234' });
-    sendEmail(mockForm);
+  it('throws a generic message when error response is not JSON', async () => {
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: false,
+      json: () => Promise.reject(new Error('not json')),
+    });
 
-    const submissions = JSON.parse(localStorage.getItem('mock_email_submissions'));
-    expect(submissions).toHaveLength(1);
-    expect(submissions[0].data.firstName).toBe('John');
-    expect(submissions[0].data.email).toBe('john@test.com');
-    expect(submissions[0].data.phone).toBe('555-1234');
-    expect(submissions[0].timestamp).toBeDefined();
-  });
+    const { default: sendInquiry } = await import('../EmailService.js');
 
-  it('appends to existing submissions', async () => {
-    const { default: sendEmail } = await import('../EmailService.js');
-    sendEmail(buildMockForm({ firstName: 'John' }));
-    sendEmail(buildMockForm({ firstName: 'Jane' }));
-
-    const submissions = JSON.parse(localStorage.getItem('mock_email_submissions'));
-    expect(submissions).toHaveLength(2);
-    expect(submissions[0].data.firstName).toBe('John');
-    expect(submissions[1].data.firstName).toBe('Jane');
-  });
-
-  it('returns a resolved promise', async () => {
-    const { default: sendEmail } = await import('../EmailService.js');
-    const result = await sendEmail(buildMockForm({ firstName: 'John' }));
-    expect(result.status).toBe(200);
-    expect(result.text).toBe('OK (mock)');
+    await expect(
+      sendInquiry({ firstName: 'John', email: '', phone: '', description: '', location: '', references: [] })
+    ).rejects.toThrow('Failed to send inquiry.');
   });
 });

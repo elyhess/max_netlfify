@@ -12,20 +12,17 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "check": "npm run test:run && npm run build",
-    "staging:deploy": "node ./scripts/netlify-staging.mjs deploy",
-    "staging:disable": "node ./scripts/netlify-staging.mjs disable",
-    "staging:enable": "node ./scripts/netlify-staging.mjs enable",
-    "staging:status": "node ./scripts/netlify-staging.mjs status"
+    "check": "npm run test:run && npm run build"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
-    "compressorjs": "^1.2.1",
+    "googleapis": "^171.4.0",
+    "nodemailer": "^8.0.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "sass": "^1.88.0"
   },
   "devDependencies": {
+    "@netlify/functions": "^5.1.5",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@vitejs/plugin-react": "^4.5.2",
