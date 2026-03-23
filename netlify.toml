@@ -12,6 +12,11 @@
   to = "/.netlify/functions/inquiry"
   status = 200
 
+[[redirects]]
+  from = "/api/gallery"
+  to = "/.netlify/functions/gallery"
+  status = 200
+
 # SPA fallback (must be last)
 [[redirects]]
   from = "/*"

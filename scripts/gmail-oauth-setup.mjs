@@ -30,7 +30,10 @@ if (!CLIENT_ID || !CLIENT_SECRET) {
 
 const PORT = 3847
 const REDIRECT_URI = `http://localhost:${PORT}/callback`
-const SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+const SCOPES = [
+  'https://www.googleapis.com/auth/gmail.send',
+  'https://www.googleapis.com/auth/drive.readonly',
+]
 
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)
 
